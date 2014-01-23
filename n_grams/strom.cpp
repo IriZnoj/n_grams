@@ -2,10 +2,10 @@
 #include <fstream>
 #include <string>
 
-#include"strom.h"
+#include "strom.h"
 
 using namespace std;
-
+ 
 strom::strom(){
 	koren=NULL;
 }
