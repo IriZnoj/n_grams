@@ -8,5 +8,7 @@
 //vlikost MAX_SLOVO je nastavena v Bzaznam.h
 
 class Bstrom{
-	Bstrom(char *text);
+	public:
+		Bstrom(char *text);
+		Bstrom(Bzaznam z);
 };
