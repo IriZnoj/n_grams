@@ -22,20 +22,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include"strom.h"
+#include "Bstrom.h"
 
 using namespace std;
 
 int main(){
 
 	//deklarace promennych
-	strom x;
-
 	char vstup[30];
+	Bstrom Strom;
 
 	while (int a = scanf("%s", vstup) >= 0){
-		printf("%s\n", vstup);
+		printf("ukladam do stromu: %s\n", vstup);
+		Strom.VlozZaznam(vstup);
 	}
+
+
 
 	return 0;
 }
