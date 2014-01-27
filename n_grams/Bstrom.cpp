@@ -2,6 +2,14 @@
 #include <stdio.h>
 #include "Bstrom.h"
 
+
+Bzaznam::Bzaznam(char *text){
+	for (int i = 0; i < MAX_SLOVO; i++){
+		this->text[i] = text[i];
+	}
+	Soused = NULL;
+}
+
 Bstrom::Bstrom(){
 	inicializace();
 	pocetZaznamu = 0;
@@ -15,11 +23,11 @@ Bstrom::Bstrom(Bzaznam *z){
 
 Bstrom::Bstrom(char *text){
 	Bzaznam *z = new Bzaznam(text);
-	Bstrom(z);
+	//Bstrom::Bstrom(z);
 }
 
 Bstrom::Bstrom(Bzaznam *z, Bstrom *LPotomek, Bstrom *RPotomek){
-	Bstrom(z);
+	//Bstrom::Bstrom(z);
 	Potomci[0] = LPotomek;
 	Potomci[0]->Rodic = this;
 	Potomci[1] = RPotomek;
@@ -48,10 +56,31 @@ void Bstrom::VlozZaznam(char *text){
 	VlozZaznam(zaznam);
 }
 
-int Bstrom::VlozZaznamDoRodice(Bzaznam *zaznam){
-	// TO DO - musim resit Potomky[]
-	// TO DO - bude vracet index kam se zaznam vlozi
-	return 0;
+void Bstrom::VlozZaznamDoRodice(Bzaznam *zaznam, Bstrom *RPotomek){
+	int porovnani;
+	if (pocetZaznamu == K - 1){
+		//je potreba list rozdelit na dva
+		RozdelUzel(zaznam, RPotomek);
+	}
+	for (int i = 0; i < pocetZaznamu; i++){
+		porovnani = JePrvniVetsi(Zaznamy[i], zaznam);
+		if (porovnani == -1){
+			//jde vlevo a na i-ty index ulozi tento prvek
+			VlozVlevo(zaznam, i);
+			PresunPotomkyVpravo(i+1);
+			Potomci[i + 1] = RPotomek;
+			return;
+		}
+		else{
+			//if (porovnani == 0){
+				//zaznam zde jiz existuje, lze dodat informace do zaznamu
+			//}
+		}
+	}
+	//jde vpravo
+	VlozVpravo(zaznam);
+	//pocet zaznamu je jiz aktualizovany, takze je ted stejny pocet zaznamu jako potomku
+	Potomci[pocetZaznamu] = RPotomek;
 }
 
 void Bstrom::VlozPrvniZaznam(char *text){
@@ -87,6 +116,7 @@ void Bstrom::VlozDoListu(Bzaznam *zaznam){
 		if (porovnani == -1){
 			//jde vlevo
 			VlozVlevo(zaznam, i);
+			return;
 		}
 		else{
 			//if(porovnani == 0)
@@ -119,7 +149,6 @@ int Bstrom::JePrvniVetsi(Bzaznam *z1, Bzaznam *z2){
 void Bstrom::VlozVlevo(Bzaznam *z, int index){
 	PresunZaznamyVpravo(index);
 	Zaznamy[index] = z;
-	pocetZaznamu++;
 	Zaznamy[index]->Soused = Zaznamy[index + 1];
 }
 
@@ -133,6 +162,13 @@ void Bstrom::PresunZaznamyVpravo(int index){
 	for (int i = pocetZaznamu; i > index; i--){
 		Zaznamy[i] = Zaznamy[i - 1];
 	}
+	pocetZaznamu++;
+}
+
+void Bstrom::PresunPotomkyVpravo(int index){
+	for (int i = pocetZaznamu+1; i > index; i--){
+		Potomci[i] = Potomci[i - 1];
+	}
 }
 
 void Bstrom::RozdelList(Bzaznam *zaznam){
@@ -142,32 +178,21 @@ void Bstrom::RozdelList(Bzaznam *zaznam){
 
 	Bzaznam *prostredniPrvek = Zaznamy[stredniIndex];
 	//prvni prvek kterej presunu do novyho uzlu je ten prvni vpravo od prostredniho...
-	Bstrom *novyUzel = new Bstrom(Zaznamy[stredniIndex+1]);
+	Bstrom *novyList = new Bstrom(Zaznamy[stredniIndex+1]);
 	Zaznamy[stredniIndex + 1] = NULL;
 	for (int i = stredniIndex + 2; i < pocetZaznamu; i++){
-		novyUzel->VlozZaznam(Zaznamy[i]);
+		novyList->VlozZaznam(Zaznamy[i]);
 		Zaznamy[i] = NULL;
 	}
-	//aktualizuju promennou pocetZaznamu, protoze jsem jich ted pulku presunul do jinyho uzlu
+	//aktualizuju promennou pocetZaznamu, protoze jsem jich ted pulku presunul do jinyho listu
 	pocetZaznamu = stredniIndex + 1;
 
-	// TO DO - doresit
 	if (Rodic != NULL){
-		Rodic->VlozZaznam(Zaznamy[stredniIndex]);
-		
-		/*
-		Potomci[stredniIndex] = this;
-		Potomci[stredniIndex] = novyUzel;
-		*/
+		Rodic->VlozZaznamDoRodice(Zaznamy[stredniIndex], novyList);
 	}
 	else{
 		//delim koren
-		Rodic = new Bstrom(Zaznamy[stredniIndex], this, novyUzel);
-		/*
-		tohle je varianta kdy jsou potomci v rodici - musel bych vzdy pri vkladani prvku potomky preskladat a to se mi nelibi
-		Rodic->Potomci[0] = this;
-		Rodic->Potomci[1] = novyUzel;
-		*/
+		Rodic = new Bstrom(Zaznamy[stredniIndex], this, novyList);
 	}
 
 	//zjistim do ktere stranky bude patrit nove vkladany prvek
@@ -179,7 +204,48 @@ void Bstrom::RozdelList(Bzaznam *zaznam){
 	else{
 		//if(porovnani == 0) zaznam zde jiz existuje, lze dodat informace do zaznamu
 		//jde vpravo
-		novyUzel->VlozZaznam(zaznam);
+		novyList->VlozZaznam(zaznam);
+	}
+}
+
+void Bstrom::RozdelUzel(Bzaznam *zaznam, Bstrom *RPotomek){
+	int stredniIndex = pocetZaznamu / 2 - 1;
+
+	Bzaznam *prostredniPrvek = Zaznamy[stredniIndex];
+	//prvni prvek kterej presunu do novyho uzlu je ten prvni vpravo od prostredniho...
+	Bstrom *novyUzel = new Bstrom(Zaznamy[stredniIndex + 1]);
+	Zaznamy[stredniIndex + 1] = NULL;
+	//jelikoz je rodicem zaznam s indexem stredniIndex+1, tak jiz vetsi zaznam jak tento sem neprijde
+	//vzdy prijde do stromu novyUzel, proto je odkaz presunut tam
+	novyUzel->Potomci[0] = Potomci[stredniIndex + 2];
+	Potomci[stredniIndex + 2] = NULL;
+	for (int i = stredniIndex + 2; i < pocetZaznamu; i++){
+		novyUzel->VlozZaznamDoRodice(Zaznamy[i], Potomci[i+1]);
+		Zaznamy[i] = NULL;
+		Potomci[i + 1] = NULL;
+	}
+
+	//aktualizuju promennou pocetZaznamu, protoze jsem jich ted pulku presunul do jinyho uzlu
+	pocetZaznamu = stredniIndex + 1;
+
+	if (Rodic != NULL){
+		Rodic->VlozZaznamDoRodice(Zaznamy[stredniIndex], novyUzel);
+	}
+	else{
+		//delim koren
+		Rodic = new Bstrom(Zaznamy[stredniIndex], this, novyUzel);
+	}
+
+	//zjistim do ktere stranky bude patrit nove vkladany prvek
+	int porovnani = JePrvniVetsi(zaznam, Zaznamy[stredniIndex]);
+	if (porovnani == -1){
+		//jde vlevo
+		VlozZaznamDoRodice(zaznam, RPotomek);
+	}
+	else{
+		//if(porovnani == 0) zaznam zde jiz existuje, lze dodat informace do zaznamu
+		//jde vpravo
+		novyUzel->VlozZaznamDoRodice(zaznam, RPotomek);
 	}
 }
 
