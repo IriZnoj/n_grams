@@ -9,12 +9,14 @@ static const int K = 4;
 //maximalni velikost zaznamu
 static const int MAX_SLOVO = 30;
 
+class Bstrom;
+static Bstrom *Koren;
 
 class Bzaznam{
 
 public:
 	char text[MAX_SLOVO];
-	Bzaznam *Soused;
+	//Bzaznam *Soused;
 
 	Bzaznam(char *text);
 };
@@ -27,6 +29,7 @@ class Bstrom{
 		Bstrom *Potomci[K + 1];
 
 		void inicializace();
+		void VytvoreniStromu(Bzaznam *z);
 		void VlozZaznam(Bzaznam *zaznam);
 		void VlozZaznamDoRodice(Bzaznam *zaznam, Bstrom *RPotomek);
 		void VlozDoPotomka(Bzaznam *zaznam);
@@ -46,5 +49,8 @@ class Bstrom{
 		Bstrom(Bzaznam *z, Bstrom *LPotomek, Bstrom *RPotomek);
 		void VlozZaznam(char *text);
 		void VlozPrvniZaznam(char *text);
-		void VypisPolozky();
+		void VypisPolozky(Bstrom *strom);
+		void Vypis();
+		void UkazStrom();
+		void VypisZaznamySPotomky();
 };

@@ -27,17 +27,23 @@
 using namespace std;
 
 int main(){
-
 	//deklarace promennych
 	char vstup[30];
 	Bstrom Strom;
 
+	scanf("%s", vstup);
+	//printf("ukladam do stromu: %s\n", vstup);
+	Strom.VlozPrvniZaznam(vstup);
+
 	while (int a = scanf("%s", vstup) >= 0){
-		printf("ukladam do stromu: %s\n", vstup);
+		//printf("ukladam do stromu: %s\n", vstup);
 		Strom.VlozZaznam(vstup);
 	}
 
-
+	//TO DO - kdyz delim list, tak zustava nejpravejsi potomek levehopotomka i nejlevejsi potomek praveho potomka
+	//je to zamerne, ten nejpravejsi lze smazat, ale nicemu tam nevadi, pouze je pak ve vypisu 2x a to by se mohlo opravit
+	Strom.Vypis();
+	Strom.UkazStrom();
 
 	return 0;
 }
