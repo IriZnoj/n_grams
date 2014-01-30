@@ -101,8 +101,12 @@ void Bstrom::VlozZaznamDoRodice(Bzaznam *zaznam, Bstrom *RPotomek){
 	VlozVpravo(zaznam);
 	//pocet zaznamu je jiz aktualizovany, takze je ted stejny pocet zaznamu jako potomku
 	Potomci[pocetZaznamu] = RPotomek;
-	//potomek ma novyho rodice
-	RPotomek->Rodic = this;
+	//potomek ma novyho rodice pokud potomek neni null (plati pro prave potomky nejpravejsich
+	//zaznamu, jelikoz tyto nejpravejsi zaznamy maji stejnou hodnotu jako rodic - proto
+	//nemuze byt nic vetsi - tedy nemuze byt nic vpravo
+	if (RPotomek != NULL){
+		RPotomek->Rodic = this;
+	}
 }
 
 void Bstrom::VlozPrvniZaznam(char *text){
@@ -262,6 +266,7 @@ void Bstrom::RozdelUzel(Bzaznam *zaznam, Bstrom *RPotomek){
 	novyUzel->Potomci[1] = Potomci[stredniIndex + 2];
 	novyUzel->Potomci[1]->Rodic = novyUzel;
 	Potomci[stredniIndex + 2] = NULL;
+	Potomci[stredniIndex + 1] = NULL;
 
 	for (int i = stredniIndex + 2; i < pocetZaznamu; i++){
 		novyUzel->VlozZaznamDoRodice(Zaznamy[i], Potomci[i+1]);
@@ -304,7 +309,10 @@ void Bstrom::RozdelUzel(Bzaznam *zaznam, Bstrom *RPotomek){
 void Bstrom::VypisPolozky(Bstrom *strom){
 	if (strom->Potomci[0] != NULL){
 		for (int i = 0; i < strom->pocetZaznamu + 1; i++){
-			strom->Potomci[i]->VypisPolozky(strom->Potomci[i]);
+			//podminka pro nejpravejsi potomky...
+			if (strom->Potomci[i] != NULL){
+				strom->Potomci[i]->VypisPolozky(strom->Potomci[i]);
+			}
 		}
 	}
 	else{

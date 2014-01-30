@@ -28,7 +28,7 @@ using namespace std;
 
 int main(){
 	//deklarace promennych
-	char vstup[30];
+	char vstup[MAX_SLOVO];
 	Bstrom Strom;
 
 	scanf("%s", vstup);
@@ -40,10 +40,8 @@ int main(){
 		Strom.VlozZaznam(vstup);
 	}
 
-	//TO DO - kdyz delim list, tak zustava nejpravejsi potomek levehopotomka i nejlevejsi potomek praveho potomka
-	//je to zamerne, ten nejpravejsi lze smazat, ale nicemu tam nevadi, pouze je pak ve vypisu 2x a to by se mohlo opravit
 	Strom.Vypis();
-	Strom.UkazStrom();
+	//Strom.UkazStrom();
 
 	return 0;
 }
