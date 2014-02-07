@@ -6,7 +6,7 @@ static const int MAX_INT = 2147483647;
 //Napr. pro K=4 budou v kazdem podstromu 2-4 zaznamy a az 5 potomku
 static const int K = 4;
 //maximalni velikost zaznamu
-static const int MAX_SLOVO = 50;
+static const int MAX_SLOVO = 75;
 
 class Bstrom;
 static Bstrom *Koren;

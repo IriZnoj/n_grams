@@ -317,7 +317,7 @@ void Bstrom::VypisPolozky(Bstrom *strom){
 	}
 	else{
 		for (int i = 0; i < strom->pocetZaznamu; i++){
-			printf("Zaznam: %s\n", strom->Zaznamy[i]->text);
+			printf("%s\n", strom->Zaznamy[i]->text);
 		}
 	}
 }
