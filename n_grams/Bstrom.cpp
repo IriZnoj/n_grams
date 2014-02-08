@@ -9,7 +9,6 @@ Bzaznam::Bzaznam(char *text){
 		if (text[i] == '\0'){
 			return;
 		}
-
 	}
 	//Soused = NULL;
 }
@@ -213,7 +212,7 @@ void Bstrom::RozdelList(Bzaznam *zaznam){
 
 	//levy zustava, pokud je K liche cislo, pak je vlevo mensi pulka
 	//pocetZaznamu/2-1 znamena, vezmu polovinu prvku, dostanu prostredni prvek a -1 dava spravny index tohoto prvku
-	//lze udelat jako konstantu - vysledek je zde vzdy stejny
+	//lze udelat jako konstantu - vysledek je zde vzdy stejny (pocetZaznamu == K)
 	int stredniIndex = pocetZaznamu / 2 - 1;
 
 	//Bzaznam *prostredniPrvek = Zaznamy[stredniIndex];
@@ -306,6 +305,56 @@ void Bstrom::RozdelUzel(Bzaznam *zaznam, Bstrom *RPotomek){
 	}
 }
 
+bool Bstrom::Vyhledej(char *text){
+	Bzaznam *z = new Bzaznam(text);
+	return Koren->Vyhledej(z);
+	/*
+	if (Vyhledej(z)){
+		printf("Nalezeno %s\n", z->text);
+		return true;
+	}
+	else{
+		printf("NENalezeno %s\n", z->text);
+		return false;
+	}
+	*/
+}
+
+bool Bstrom::Vyhledej(Bzaznam *z){
+	if (JeStromList()){
+		for (int i = 0; i < pocetZaznamu; i++){
+			int porovnani = JePrvniVetsi(Zaznamy[i], z);
+			if (porovnani > 0){
+				//printf("NENalezeno %s (< %s)\n", z->text, Zaznamy[i]);
+				return false;
+			}
+			else if(porovnani == 0){
+				//printf("Nalezeno %s\n", z->text);
+				return true;
+			}
+		}
+		//printf("NENalezeno %s (> %s)\n", z->text, Zaznamy[pocetZaznamu-1]);
+		return false;
+	}
+	else{
+		for (int i = 0; i < pocetZaznamu; i++){
+			int porovnani = JePrvniVetsi(Zaznamy[i], z);
+			if (porovnani >= 0){
+				//printf("%s >= %s\n", Zaznamy[i], z->text);
+				return Potomci[i]->Vyhledej(z);
+			}
+		}
+		//printf("%s < %s\n", Zaznamy[pocetZaznamu-1], z->text);
+		return Potomci[pocetZaznamu]->Vyhledej(z);
+	}
+}
+
+bool Bstrom::JeStromList(){
+	if (Potomci[0] == NULL){
+		return true;
+	}
+	return false;
+}
 void Bstrom::VypisPolozky(Bstrom *strom){
 	if (strom->Potomci[0] != NULL){
 		for (int i = 0; i < strom->pocetZaznamu + 1; i++){

@@ -58,7 +58,9 @@ int main(){
 	}
 
 	Strom.Vypis();
-	//Strom.UkazStrom();
+	Strom.UkazStrom();
+
+	Strom.Vyhledej("1000");
 
 	return 0;
 }

@@ -40,6 +40,8 @@ class Bstrom{
 		void PresunPotomkyVpravo(int index);
 		void RozdelList(Bzaznam *zaznam);
 		void RozdelUzel(Bzaznam *zaznam, Bstrom *RPotomek);
+		bool Vyhledej(Bzaznam *zaznam);
+		bool JeStromList();
 
 	public:
 		Bstrom();
@@ -48,6 +50,7 @@ class Bstrom{
 		Bstrom(Bzaznam *z, Bstrom *LPotomek, Bstrom *RPotomek);
 		void VlozZaznam(char *text);
 		void VlozPrvniZaznam(char *text);
+		bool Vyhledej(char *text);
 		void VypisPolozky(Bstrom *strom);
 		void Vypis();
 		void UkazStrom();
