@@ -22,14 +22,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Bstrom.h"
-
+//#include "Bstrom.h"
+#include "Rstrom.h"
 using namespace std;
 
 int main(){
-	//deklarace promennych
-	char vstup[MAX_SLOVO];
-	Bstrom Strom;
 	/* jednotlive zaznamy oddeleny bilym znakem
 	scanf("%s", vstup);
 	//printf("ukladam do stromu: %s\n", vstup);
@@ -41,6 +38,10 @@ int main(){
 	}
 	*/
 
+	//--------------------Bstrom--------------------
+/*	char vstup[MAX_SLOVO];
+	Bstrom Strom;
+	
 	//zaznamy oddeleny koncem radku
 	int znak = getchar();
 	int pocet_pismen;
@@ -52,7 +53,7 @@ int main(){
 			znak = getchar();
 		}
 		vstup[pocet_pismen++] = '\0';
-		//printf("ukladam do stromu: %s\n", vstup);
+		printf("ukladam do stromu: %s\n", vstup);
 		Strom.VlozZaznam(vstup); 
 		znak = getchar();
 	}
@@ -61,6 +62,41 @@ int main(){
 	Strom.UkazStrom();
 
 	Strom.Vyhledej("1000");
+*/
+
+	//--------------------Rstrom--------------------
+	//delkarace promennych
+	int x = 0;
+	int y = 0;
+	Rstrom Strom;
+
+	int a = scanf("%d", &x);
+	int b = scanf("%d", &y);
+	printf("ukladam do stromu: %d, %d\n", x, y);
+	Strom.VlozPrvniZaznam(x, y);
+
+
+	a = scanf("%d", &x);
+	if (a <= 0){
+		b = -1;
+	}
+	else{
+		b = scanf("%d", &y);
+	}
+
+	while (b > 0){
+		printf("ukladam do stromu: %d, %d\n", x, y);
+		//Strom.VlozZaznam(x, y);
+		a = scanf("%d", &x);
+		if (a <= 0){
+			break;
+		}
+
+		b = scanf("%d", &y);
+	}
+
+	Strom.Vypis();
+	Strom.UkazStrom();
 
 	return 0;
 }

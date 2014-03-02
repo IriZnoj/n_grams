@@ -1,34 +1,30 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "Bstrom.h"
+#include "Rstrom.h"
 
 
-Bzaznam::Bzaznam(char *text){
-	for (int i = 0; i < MAX_SLOVO; i++){
-		this->text[i] = text[i];
-		if (text[i] == '\0'){
-			return;
-		}
-	}
+Rzaznam::Rzaznam(int x, int y){
+	this->x = x;
+	this->y = y;
 	//Soused = NULL;
 }
 
-Bstrom::Bstrom(){
+Rstrom::Rstrom(){
 	inicializace();
 	pocetZaznamu = 0;
 	Koren = this;
 }
 
-Bstrom::Bstrom(Bzaznam *z){
+Rstrom::Rstrom(Rzaznam *z){
 	VytvoreniStromu(z);
 }
 
-Bstrom::Bstrom(char *text){
-	Bzaznam *z = new Bzaznam(text);
+Rstrom::Rstrom(int x, int y){
+	Rzaznam *z = new Rzaznam(x, y);
 	VytvoreniStromu(z);
 }
 
-Bstrom::Bstrom(Bzaznam *z, Bstrom *LPotomek, Bstrom *RPotomek){
+Rstrom::Rstrom(Rzaznam *z, Rstrom *LPotomek, Rstrom *RPotomek){
 	VytvoreniStromu(z);
 	Potomci[0] = LPotomek;
 	Potomci[0]->Rodic = this;
@@ -36,9 +32,9 @@ Bstrom::Bstrom(Bzaznam *z, Bstrom *LPotomek, Bstrom *RPotomek){
 	Potomci[1]->Rodic = this;
 }
 
-void Bstrom::inicializace(){
+void Rstrom::inicializace(){
 	Rodic = NULL;
-	for (int i = 0; i < K ; i++){
+	for (int i = 0; i < K; i++){
 		Potomci[i] = NULL;
 		Zaznamy[i] = NULL;
 	}
@@ -46,13 +42,13 @@ void Bstrom::inicializace(){
 	Potomci[K] = NULL;
 }
 
-void Bstrom::VytvoreniStromu(Bzaznam *z){
+void Rstrom::VytvoreniStromu(Rzaznam *z){
 	inicializace();
 	Zaznamy[0] = z;
 	pocetZaznamu = 1;
 }
 
-void Bstrom::VlozZaznam(Bzaznam *zaznam){
+void Rstrom::VlozZaznam(Rzaznam *zaznam){
 	if (Potomci[0] != NULL){
 		//nejsem v listu
 		VlozDoPotomka(zaznam);
@@ -62,8 +58,8 @@ void Bstrom::VlozZaznam(Bzaznam *zaznam){
 	}
 }
 
-void Bstrom::VlozZaznam(char *text){
-	Bzaznam *zaznam = new Bzaznam(text);
+void Rstrom::VlozZaznam(int x, int y){
+	Rzaznam *zaznam = new Rzaznam(x, y);
 	if (Koren->Potomci[0] != NULL){
 		//nejsem v listu
 		Koren->VlozDoPotomka(zaznam);
@@ -73,7 +69,7 @@ void Bstrom::VlozZaznam(char *text){
 	}
 }
 
-void Bstrom::VlozZaznamDoRodice(Bzaznam *zaznam, Bstrom *RPotomek){
+void Rstrom::VlozZaznamDoRodice(Rzaznam *zaznam, Rstrom *RPotomek){
 	int porovnani;
 	if (pocetZaznamu == K){
 		//je potreba list rozdelit na dva
@@ -85,7 +81,7 @@ void Bstrom::VlozZaznamDoRodice(Bzaznam *zaznam, Bstrom *RPotomek){
 		if (porovnani == 1){
 			//jde vlevo a na i-ty index ulozi tento prvek
 			VlozVlevo(zaznam, i);
-			PresunPotomkyVpravo(i+1);
+			PresunPotomkyVpravo(i + 1);
 			Potomci[i + 1] = RPotomek;
 			//potomek ma novyho rodice
 			RPotomek->Rodic = this;
@@ -108,13 +104,18 @@ void Bstrom::VlozZaznamDoRodice(Bzaznam *zaznam, Bstrom *RPotomek){
 	}
 }
 
-void Bstrom::VlozPrvniZaznam(char *text){
-	Zaznamy[0] = new Bzaznam(text);
+void Rstrom::VlozPrvniZaznam(int x, int y){
+	Zaznamy[0] = new Rzaznam(x, y);
 	pocetZaznamu = 1;
 }
 
-void Bstrom::VlozDoPotomka(Bzaznam *zaznam){
+void Rstrom::VlozDoPotomka(Rzaznam *zaznam){
 	int porovnani;
+
+	/* TO DO */
+	//najdi zaznam F tak, ze ObdelnikIndexovehoZaznamuF potrebuje nejmensi rozsireni, 
+	//aby OIZNovehoZaznamu byl podmnizinou OIZF. Prednost ma zaznam s mensim obdelnikem
+	//do N uloz idF
 	for (int i = 0; i < pocetZaznamu; i++){
 		porovnani = JePrvniVetsi(Zaznamy[i], zaznam);
 		if (porovnani == 1){
@@ -131,7 +132,7 @@ void Bstrom::VlozDoPotomka(Bzaznam *zaznam){
 	Potomci[pocetZaznamu]->VlozZaznam(zaznam);
 }
 
-void Bstrom::VlozDoListu(Bzaznam *zaznam){
+void Rstrom::VlozDoListu(Rzaznam *zaznam){
 	int porovnani;
 	if (pocetZaznamu == K){
 		//je potreba list rozdelit na dva
@@ -158,13 +159,13 @@ return -1 prvni je mensi
 return 0 jsou stejne
 return 1 prvni je vetsi
 */
-int Bstrom::JePrvniVetsi(Bzaznam *z1, Bzaznam *z2){
+int Rstrom::JePrvniVetsi(Rzaznam *z1, Rzaznam *z2){
 	for (int i = 0; i < MAX_SLOVO; i++){
-		if (z1->text[i] < z2->text[i]){
+		if (z1->x < z2->x){
 			//z1 je mensi
 			return -1;
 		}
-		else if (z1->text[i] > z2->text[i]){
+		else if (z1->x > z2->x){
 			//z1 je vetsi
 			return 1;
 		}
@@ -173,19 +174,19 @@ int Bstrom::JePrvniVetsi(Bzaznam *z1, Bzaznam *z2){
 	return 0;
 }
 
-void Bstrom::VlozVlevo(Bzaznam *z, int index){
+void Rstrom::VlozVlevo(Rzaznam *z, int index){
 	PresunZaznamyVpravo(index);
 	Zaznamy[index] = z;
 	//Zaznamy[index]->Soused = Zaznamy[index + 1];
 }
 
-void Bstrom::VlozVpravo(Bzaznam *z){
+void Rstrom::VlozVpravo(Rzaznam *z){
 	Zaznamy[pocetZaznamu] = z;
 	//Zaznamy[pocetZaznamu - 1]->Soused = Zaznamy[pocetZaznamu++];
 	pocetZaznamu++;
 }
 
-void Bstrom::PresunZaznamyVpravo(int index){
+void Rstrom::PresunZaznamyVpravo(int index){
 	//vim, ze pocet zaznamu je < K-1
 	for (int i = pocetZaznamu; i > index; i--){
 		Zaznamy[i] = Zaznamy[i - 1];
@@ -193,13 +194,13 @@ void Bstrom::PresunZaznamyVpravo(int index){
 	pocetZaznamu++;
 }
 
-void Bstrom::PresunPotomkyVpravo(int index){
-	for (int i = pocetZaznamu+1; i > index; i--){
+void Rstrom::PresunPotomkyVpravo(int index){
+	for (int i = pocetZaznamu + 1; i > index; i--){
 		Potomci[i] = Potomci[i - 1];
 	}
 }
 
-void Bstrom::RozdelList(Bzaznam *zaznam){
+void Rstrom::RozdelList(Rzaznam *zaznam){
 	//nejdrive zkontroluji, jestli se zde zaznam nevyskytuje
 	int porovnani;
 	for (int i = 0; i < pocetZaznamu; i++){
@@ -215,9 +216,9 @@ void Bstrom::RozdelList(Bzaznam *zaznam){
 	//lze udelat jako konstantu - vysledek je zde vzdy stejny (pocetZaznamu == K)
 	int stredniIndex = pocetZaznamu / 2 - 1;
 
-	//Bzaznam *prostredniPrvek = Zaznamy[stredniIndex];
+	//Rzaznam *prostredniPrvek = Zaznamy[stredniIndex];
 	//prvni prvek kterej presunu do novyho uzlu je ten prvni vpravo od prostredniho...
-	Bstrom *novyList = new Bstrom(Zaznamy[stredniIndex+1]);
+	Rstrom *novyList = new Rstrom(Zaznamy[stredniIndex + 1]);
 	Zaznamy[stredniIndex + 1] = NULL;
 	for (int i = stredniIndex + 2; i < pocetZaznamu; i++){
 		novyList->VlozZaznam(Zaznamy[i]);
@@ -232,7 +233,7 @@ void Bstrom::RozdelList(Bzaznam *zaznam){
 	}
 	else{
 		//delim koren
-		Rodic = new Bstrom(Zaznamy[stredniIndex], this, novyList);
+		Rodic = new Rstrom(Zaznamy[stredniIndex], this, novyList);
 		Koren = Rodic;
 		//printf("Novy koren - zaznam: %s\n", Koren->Zaznamy[0]->text);
 	}
@@ -250,13 +251,13 @@ void Bstrom::RozdelList(Bzaznam *zaznam){
 	}
 }
 
-void Bstrom::RozdelUzel(Bzaznam *zaznam, Bstrom *RPotomek){
+void Rstrom::RozdelUzel(Rzaznam *zaznam, Rstrom *RPotomek){
 	//lze udelat jako konstantu - vysledek je zde vzdy stejny
 	int stredniIndex = pocetZaznamu / 2 - 1;
 
-	Bzaznam *prostredniPrvek = Zaznamy[stredniIndex];
+	Rzaznam *prostredniPrvek = Zaznamy[stredniIndex];
 	//prvni prvek kterej presunu do novyho uzlu je ten prvni vpravo od prostredniho...
-	Bstrom *novyUzel = new Bstrom(Zaznamy[stredniIndex + 1]);
+	Rstrom *novyUzel = new Rstrom(Zaznamy[stredniIndex + 1]);
 	Zaznamy[stredniIndex + 1] = NULL;
 	//jelikoz je rodicem zaznam s indexem stredniIndex+1, tak jiz vetsi zaznam jak tento sem neprijde
 	//vzdy prijde do stromu novyUzel, proto je odkaz presunut tam
@@ -268,14 +269,14 @@ void Bstrom::RozdelUzel(Bzaznam *zaznam, Bstrom *RPotomek){
 	Potomci[stredniIndex + 1] = NULL;
 
 	for (int i = stredniIndex + 2; i < pocetZaznamu; i++){
-		novyUzel->VlozZaznamDoRodice(Zaznamy[i], Potomci[i+1]);
+		novyUzel->VlozZaznamDoRodice(Zaznamy[i], Potomci[i + 1]);
 		Zaznamy[i] = NULL;
 		Potomci[i + 1] = NULL;
 	}
 
 	/*	osetreno pro vkladani uzlu
-		for (int i = 0; i < novyUzel->pocetZaznamu + 1; i++){
-		novyUzel->Potomci[i]->Rodic = novyUzel;
+	for (int i = 0; i < novyUzel->pocetZaznamu + 1; i++){
+	novyUzel->Potomci[i]->Rodic = novyUzel;
 	}*/
 
 	//aktualizuju promennou pocetZaznamu, protoze jsem jich ted pulku presunul do jinyho uzlu
@@ -286,7 +287,7 @@ void Bstrom::RozdelUzel(Bzaznam *zaznam, Bstrom *RPotomek){
 	}
 	else{
 		//delim koren
-		Rodic = new Bstrom(Zaznamy[stredniIndex], this, novyUzel);
+		Rodic = new Rstrom(Zaznamy[stredniIndex], this, novyUzel);
 		Koren = Rodic;
 		//printf("Novy koren - zaznam: %s\n", Koren->Zaznamy[0]->text);
 	}
@@ -305,11 +306,9 @@ void Bstrom::RozdelUzel(Bzaznam *zaznam, Bstrom *RPotomek){
 	}
 }
 
-bool Bstrom::Vyhledej(char *text){
-	Bzaznam *z = new Bzaznam(text);
-
-	/*
-	if (Vyhledej(z)){
+bool Rstrom::Vyhledej(int x, int y){
+	Rzaznam *z = new Rzaznam(x, y);
+	/*if (Vyhledej(z)){
 		printf("Nalezeno %s\n", z->text);
 		return true;
 	}
@@ -318,11 +317,10 @@ bool Bstrom::Vyhledej(char *text){
 		return false;
 	}
 	*/
-
 	return Koren->Vyhledej(z);
 }
 
-bool Bstrom::Vyhledej(Bzaznam *z){
+bool Rstrom::Vyhledej(Rzaznam *z){
 	if (JeStromList()){
 		for (int i = 0; i < pocetZaznamu; i++){
 			int porovnani = JePrvniVetsi(Zaznamy[i], z);
@@ -330,7 +328,7 @@ bool Bstrom::Vyhledej(Bzaznam *z){
 				//printf("NENalezeno %s (< %s)\n", z->text, Zaznamy[i]);
 				return false;
 			}
-			else if(porovnani == 0){
+			else if (porovnani == 0){
 				//printf("Nalezeno %s\n", z->text);
 				return true;
 			}
@@ -351,13 +349,13 @@ bool Bstrom::Vyhledej(Bzaznam *z){
 	}
 }
 
-bool Bstrom::JeStromList(){
+bool Rstrom::JeStromList(){
 	if (Potomci[0] == NULL){
 		return true;
 	}
 	return false;
 }
-void Bstrom::VypisPolozky(Bstrom *strom){
+void Rstrom::VypisPolozky(Rstrom *strom){
 	if (strom->Potomci[0] != NULL){
 		for (int i = 0; i < strom->pocetZaznamu + 1; i++){
 			//podminka pro nejpravejsi potomky...
@@ -368,16 +366,16 @@ void Bstrom::VypisPolozky(Bstrom *strom){
 	}
 	else{
 		for (int i = 0; i < strom->pocetZaznamu; i++){
-			printf("%s\n", strom->Zaznamy[i]->text);
+			printf("%d, %d\n", strom->Zaznamy[i]->x, strom->Zaznamy[i]->y);
 		}
 	}
 }
 
-void Bstrom::Vypis(){
+void Rstrom::Vypis(){
 	VypisPolozky(Koren);
 }
 
-void Bstrom::UkazStrom(){
+void Rstrom::UkazStrom(){
 	printf("Koren: \n");
 	Koren->VypisZaznamySPotomky();
 	if (Koren->Potomci[0] != NULL){
@@ -387,9 +385,9 @@ void Bstrom::UkazStrom(){
 	}
 }
 
-void Bstrom::VypisZaznamySPotomky(){
+void Rstrom::VypisZaznamySPotomky(){
 	for (int i = 0; i < pocetZaznamu; i++){
-		printf("Cislo zaznamu: %d, zaznam: %s\n", i, Zaznamy[i]->text);
+		printf("Cislo zaznamu: %d, zaznam: %d, %d\n", i, Zaznamy[i]->x, Zaznamy[i]->y);
 		/*if (Zaznamy[i]->Soused != NULL){
 		printf(" - Soused: %s\n", Zaznamy[i]->Soused->text);
 		}*/
@@ -397,7 +395,7 @@ void Bstrom::VypisZaznamySPotomky(){
 	for (int i = 0; i < K + 1; i++){
 		if (Potomci[i] != NULL){
 			for (int j = 0; j < Potomci[i]->pocetZaznamu; j++){
-				printf("Potomek %d: %s\n", i, Potomci[i]->Zaznamy[j]->text);
+				printf("Potomek %d: %d, %d\n", i, Potomci[i]->Zaznamy[j]->x, Potomci[i]->Zaznamy[j]->y);
 			}
 		}
 	}
