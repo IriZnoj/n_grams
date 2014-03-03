@@ -2,17 +2,22 @@
 #include <stdio.h>
 #include "Rstrom.h"
 
+//kazdy zaznam je ve tvaru (mbr, oid) kde
+//mbr = minimalni ohranicujici obdelnik ktery obsahuje objekt, 
+//oid je id objektu - pouzivam dvojici (x, y) jako jednoznacny identifikator
 
 Rzaznam::Rzaznam(int x, int y){
 	this->x = x;
 	this->y = y;
+	
+	this->mbr = NULL;
 	//Soused = NULL;
 }
 
 Rstrom::Rstrom(){
-	inicializace();
-	pocetZaznamu = 0;
 	Koren = this;
+	//po vytvoreni stromu timto zpusobem je vzdy volana
+	//metoda VlozPrvniZaznam(int x, int y); az tehdy se cely strom inicializuje
 }
 
 Rstrom::Rstrom(Rzaznam *z){
@@ -24,6 +29,7 @@ Rstrom::Rstrom(int x, int y){
 	VytvoreniStromu(z);
 }
 
+/* TODO - rozdeleni uzlu */
 Rstrom::Rstrom(Rzaznam *z, Rstrom *LPotomek, Rstrom *RPotomek){
 	VytvoreniStromu(z);
 	Potomci[0] = LPotomek;
@@ -46,8 +52,19 @@ void Rstrom::VytvoreniStromu(Rzaznam *z){
 	inicializace();
 	Zaznamy[0] = z;
 	pocetZaznamu = 1;
+	//pro jeden bod je hranice mbr prave tento bod
+	this->l = z->x;
+	this->u = z->y;
+	this->r = z->x;
+	this->d = z->y;
 }
 
+void Rstrom::VlozPrvniZaznam(int x, int y){
+	Rzaznam *z = new Rzaznam(x, y);
+	VytvoreniStromu(z);
+}
+
+/* TODO VlozDoPotomka */
 void Rstrom::VlozZaznam(Rzaznam *zaznam){
 	if (Potomci[0] != NULL){
 		//nejsem v listu
@@ -60,15 +77,10 @@ void Rstrom::VlozZaznam(Rzaznam *zaznam){
 
 void Rstrom::VlozZaznam(int x, int y){
 	Rzaznam *zaznam = new Rzaznam(x, y);
-	if (Koren->Potomci[0] != NULL){
-		//nejsem v listu
-		Koren->VlozDoPotomka(zaznam);
-	}
-	else{
-		Koren->VlozDoListu(zaznam);
-	}
+	Koren->VlozZaznam(zaznam);
 }
 
+/* TODO - rozdeleni */
 void Rstrom::VlozZaznamDoRodice(Rzaznam *zaznam, Rstrom *RPotomek){
 	int porovnani;
 	if (pocetZaznamu == K){
@@ -104,11 +116,7 @@ void Rstrom::VlozZaznamDoRodice(Rzaznam *zaznam, Rstrom *RPotomek){
 	}
 }
 
-void Rstrom::VlozPrvniZaznam(int x, int y){
-	Zaznamy[0] = new Rzaznam(x, y);
-	pocetZaznamu = 1;
-}
-
+/* TODO */
 void Rstrom::VlozDoPotomka(Rzaznam *zaznam){
 	int porovnani;
 
@@ -132,6 +140,7 @@ void Rstrom::VlozDoPotomka(Rzaznam *zaznam){
 	Potomci[pocetZaznamu]->VlozZaznam(zaznam);
 }
 
+/* TODO RozdelList */
 void Rstrom::VlozDoListu(Rzaznam *zaznam){
 	int porovnani;
 	if (pocetZaznamu == K){
@@ -139,67 +148,56 @@ void Rstrom::VlozDoListu(Rzaznam *zaznam){
 		RozdelList(zaznam);
 		return;
 	}
-	for (int i = 0; i < pocetZaznamu; i++){
-		porovnani = JePrvniVetsi(Zaznamy[i], zaznam);
-		if (porovnani == 1){
-			//jde vlevo
-			VlozVlevo(zaznam, i);
-			return;
-		}
-		else if (porovnani == 0){
-			//zaznam zde jiz existuje, lze dodat informace do zaznamu
-			return;
-		}
-	}
-	//jde vpravo
-	VlozVpravo(zaznam);
-}
-/*
-return -1 prvni je mensi
-return 0 jsou stejne
-return 1 prvni je vetsi
-*/
-int Rstrom::JePrvniVetsi(Rzaznam *z1, Rzaznam *z2){
-	for (int i = 0; i < MAX_SLOVO; i++){
-		if (z1->x < z2->x){
-			//z1 je mensi
-			return -1;
-		}
-		else if (z1->x > z2->x){
-			//z1 je vetsi
-			return 1;
-		}
-	}
-	//zaznamy jsou stejne
-	return 0;
-}
-
-void Rstrom::VlozVlevo(Rzaznam *z, int index){
-	PresunZaznamyVpravo(index);
-	Zaznamy[index] = z;
-	//Zaznamy[index]->Soused = Zaznamy[index + 1];
-}
-
-void Rstrom::VlozVpravo(Rzaznam *z){
-	Zaznamy[pocetZaznamu] = z;
-	//Zaznamy[pocetZaznamu - 1]->Soused = Zaznamy[pocetZaznamu++];
+	//pokud je misto, tak to tam vlozim
+	Zaznamy[pocetZaznamu] = zaznam;
 	pocetZaznamu++;
+	//je potreba upravit hranice mbr
+	ZkontrolujHranici(zaznam->x, zaznam->y);
 }
 
-void Rstrom::PresunZaznamyVpravo(int index){
-	//vim, ze pocet zaznamu je < K-1
-	for (int i = pocetZaznamu; i > index; i--){
-		Zaznamy[i] = Zaznamy[i - 1];
+void Rstrom::ZkontrolujHranici(int x, int y){
+	bool zmena = false;
+
+	if (this->l > x){
+		PosunHranici(vlevo, x);
+		zmena = true;
 	}
-	pocetZaznamu++;
-}
-
-void Rstrom::PresunPotomkyVpravo(int index){
-	for (int i = pocetZaznamu + 1; i > index; i--){
-		Potomci[i] = Potomci[i - 1];
+	if (this->r < x){
+		PosunHranici(vpravo, x);
+		zmena = true;
+	}
+	if (this->u < y){
+		PosunHranici(nahoru, y);
+		zmena = true;
+	}
+	if (this->d > y){
+		PosunHranici(dolu, y);
+		zmena = true;
+	}
+	
+	//kdyz posouvam hranici, tak musim zkontrolovat jestli netreba posunout i rodice
+	if (zmena && Rodic != NULL){
+		this->Rodic->ZkontrolujHranici(x, y);
 	}
 }
 
+void Rstrom::PosunHranici(strana s, int hodnota){
+	switch (s){
+		case vlevo:
+			this->l = hodnota;
+			break;
+		case vpravo:
+			this->r = hodnota;
+			break;
+		case nahoru:
+			this->u = hodnota;
+			break;
+		case dolu:
+			this->d = hodnota;
+			break;
+	}
+}
+/* TODO */
 void Rstrom::RozdelList(Rzaznam *zaznam){
 	//nejdrive zkontroluji, jestli se zde zaznam nevyskytuje
 	int porovnani;
@@ -251,6 +249,7 @@ void Rstrom::RozdelList(Rzaznam *zaznam){
 	}
 }
 
+/* TODO */
 void Rstrom::RozdelUzel(Rzaznam *zaznam, Rstrom *RPotomek){
 	//lze udelat jako konstantu - vysledek je zde vzdy stejny
 	int stredniIndex = pocetZaznamu / 2 - 1;
@@ -320,6 +319,7 @@ bool Rstrom::Vyhledej(int x, int y){
 	return Koren->Vyhledej(z);
 }
 
+/* TODO */
 bool Rstrom::Vyhledej(Rzaznam *z){
 	if (JeStromList()){
 		for (int i = 0; i < pocetZaznamu; i++){
@@ -355,6 +355,8 @@ bool Rstrom::JeStromList(){
 	}
 	return false;
 }
+
+/* TODO */
 void Rstrom::VypisPolozky(Rstrom *strom){
 	if (strom->Potomci[0] != NULL){
 		for (int i = 0; i < strom->pocetZaznamu + 1; i++){
@@ -371,10 +373,12 @@ void Rstrom::VypisPolozky(Rstrom *strom){
 	}
 }
 
+/* TODO */
 void Rstrom::Vypis(){
 	VypisPolozky(Koren);
 }
 
+/* TODO */
 void Rstrom::UkazStrom(){
 	printf("Koren: \n");
 	Koren->VypisZaznamySPotomky();
@@ -385,6 +389,7 @@ void Rstrom::UkazStrom(){
 	}
 }
 
+/* TODO */
 void Rstrom::VypisZaznamySPotomky(){
 	for (int i = 0; i < pocetZaznamu; i++){
 		printf("Cislo zaznamu: %d, zaznam: %d, %d\n", i, Zaznamy[i]->x, Zaznamy[i]->y);
