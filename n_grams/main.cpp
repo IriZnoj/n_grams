@@ -86,7 +86,7 @@ int main(){
 
 	while (b > 0){
 		printf("ukladam do stromu: %d, %d\n", x, y);
-		//Strom.VlozZaznam(x, y);
+		Strom.VlozZaznam(x, y);
 		a = scanf("%d", &x);
 		if (a <= 0){
 			break;

@@ -7,6 +7,8 @@ static const int MAX_INT = 2147483647;
 //K udava pocet zaznamu ve strankach/uzlech/podstromech
 //Napr. pro K=4 budou v kazdem podstromu 2-4 zaznamy a az 5 potomku
 static const int K = 4;
+//m je nejmensi pocet zaznamu v listu
+static const int m = 2;
 //maximalni velikost zaznamu--------------------------------------!!!
 static const int MAX_SLOVO = 75;
 
@@ -36,6 +38,8 @@ private:
 	int r; //right
 	int d; //down
 
+	int mbr; //obsah
+
 	int pocetZaznamu;
 	Rzaznam *Zaznamy[K];
 	Rstrom *Rodic;
@@ -48,13 +52,11 @@ private:
 	void VlozDoPotomka(Rzaznam *zaznam);
 	void ZkontrolujHranici(int x, int y);
 	void PosunHranici(strana, int hodnota);
+	int VypocitejObsah(int ax, int ay, int bx, int by);
 	void VlozDoListu(Rzaznam *zaznam);
-	int JePrvniVetsi(Rzaznam *z1, Rzaznam *z2);
-	void VlozVlevo(Rzaznam *z, int index);
-	void VlozVpravo(Rzaznam *z);
-	void PresunZaznamyVpravo(int index);
-	void PresunPotomkyVpravo(int index);
 	void RozdelList(Rzaznam *zaznam);
+	void VyberDvaZaznamy(int &l, int &r);
+	void PreskladejZaznamy();
 	void RozdelUzel(Rzaznam *zaznam, Rstrom *RPotomek);
 	bool Vyhledej(Rzaznam *zaznam);
 	bool JeStromList();
@@ -63,7 +65,7 @@ public:
 	Rstrom();
 	Rstrom(int x, int y);
 	Rstrom(Rzaznam *z);
-	Rstrom(Rzaznam *z, Rstrom *LPotomek, Rstrom *RPotomek);
+	Rstrom(Rstrom *LPotomek, Rstrom *RPotomek);
 	void VlozZaznam(int x, int y);
 	void VlozPrvniZaznam(int x, int y);
 	bool Vyhledej(int x, int y);
