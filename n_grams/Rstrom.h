@@ -48,16 +48,17 @@ private:
 	void inicializace();
 	void VytvoreniStromu(Rzaznam *z);
 	void VlozZaznam(Rzaznam *zaznam);
-	void VlozZaznamDoRodice(Rzaznam *zaznam, Rstrom *RPotomek);
-	void VlozDoPotomka(Rzaznam *zaznam);
+	void VlozUzelDoRodice(Rstrom *RPotomek);
+	void VlozDoUzlu(Rzaznam *zaznam);
 	void ZkontrolujHranici(int x, int y);
+	void ZkontrolujHranici(int l, int r, int u, int d);
 	void PosunHranici(strana, int hodnota);
 	int VypocitejObsah(int ax, int ay, int bx, int by);
 	void VlozDoListu(Rzaznam *zaznam);
 	void RozdelList(Rzaznam *zaznam);
 	void VyberDvaZaznamy(int &l, int &r);
 	void PreskladejZaznamy();
-	void RozdelUzel(Rzaznam *zaznam, Rstrom *RPotomek);
+	void RozdelUzel(Rstrom *RPotomek);
 	bool Vyhledej(Rzaznam *zaznam);
 	bool JeStromList();
 

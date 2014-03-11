@@ -31,7 +31,8 @@ Rstrom::Rstrom(int x, int y){
 
 Rstrom::Rstrom(Rstrom *LPotomek, Rstrom *RPotomek){
 	Potomci[0] = LPotomek;
-	Potomci[0]->Rodic = this;
+	//uz jem nastavil pred volanim teto metody
+	//Potomci[0]->Rodic = this;
 	Potomci[1] = RPotomek;
 	Potomci[1]->Rodic = this;
 	//hranice rodice
@@ -59,6 +60,8 @@ Rstrom::Rstrom(Rstrom *LPotomek, Rstrom *RPotomek){
 	else{
 		u = RPotomek->u;
 	}
+
+	mbr = VypocitejObsah(l, d, r, u);
 	
 }
 
@@ -81,6 +84,8 @@ void Rstrom::VytvoreniStromu(Rzaznam *z){
 	this->u = z->y;
 	this->r = z->x;
 	this->d = z->y;
+	this->mbr = 0;
+
 }
 
 void Rstrom::VlozPrvniZaznam(int x, int y){
@@ -88,11 +93,10 @@ void Rstrom::VlozPrvniZaznam(int x, int y){
 	VytvoreniStromu(z);
 }
 
-/* TODO VlozDoPotomka */
 void Rstrom::VlozZaznam(Rzaznam *zaznam){
 	if (Potomci[0] != NULL){
 		//nejsem v listu
-		VlozDoPotomka(zaznam);
+		VlozDoUzlu(zaznam);
 	}
 	else{
 		VlozDoListu(zaznam);
@@ -104,59 +108,29 @@ void Rstrom::VlozZaznam(int x, int y){
 	Koren->VlozZaznam(zaznam);
 }
 
-/* TODO - rozdeleni */
-void Rstrom::VlozZaznamDoRodice(Rzaznam *zaznam, Rstrom *RPotomek){
+void Rstrom::VlozUzelDoRodice(Rstrom *RPotomek){
 	int porovnani;
 	if (pocetZaznamu == K){
 		//je potreba list rozdelit na dva
-		RozdelUzel(zaznam, RPotomek);
+		RozdelUzel(RPotomek);
 		return;
 	}
-	for (int i = 0; i < pocetZaznamu; i++){
-		if (porovnani == 1){
-			//jde vlevo a na i-ty index ulozi tento prvek
-			Potomci[i + 1] = RPotomek;
-			//potomek ma novyho rodice
-			RPotomek->Rodic = this;
-			return;
-		}
-		else if (porovnani == 0){
-			//zaznam zde jiz existuje, lze dodat informace do zaznamu
-			return;
-		}
-	}
-	//jde vpravo
-	//pocet zaznamu je jiz aktualizovany, takze je ted stejny pocet zaznamu jako potomku
 	Potomci[pocetZaznamu] = RPotomek;
-	//potomek ma novyho rodice pokud potomek neni null (plati pro prave potomky nejpravejsich
-	//zaznamu, jelikoz tyto nejpravejsi zaznamy maji stejnou hodnotu jako rodic - proto
-	//nemuze byt nic vetsi - tedy nemuze byt nic vpravo
 	if (RPotomek != NULL){
 		RPotomek->Rodic = this;
 	}
+	//uprava hranic pokud je treba
+	ZkontrolujHranici(RPotomek->l, RPotomek->r, RPotomek->u, RPotomek->d);
 }
 
 /* TODO */
-void Rstrom::VlozDoPotomka(Rzaznam *zaznam){
+void Rstrom::VlozDoUzlu(Rzaznam *zaznam){
 	int porovnani;
 
 	/* TO DO */
 	//najdi zaznam F tak, ze ObdelnikIndexovehoZaznamuF potrebuje nejmensi rozsireni, 
 	//aby OIZNovehoZaznamu byl podmnizinou OIZF. Prednost ma zaznam s mensim obdelnikem
 	//do N uloz idF
-	for (int i = 0; i < pocetZaznamu; i++){
-		if (porovnani == 1){
-			//jde vlevo
-			Potomci[i]->VlozZaznam(zaznam);
-			return;
-		}
-		else if (porovnani == 0){
-			//zaznam zde jiz existuje, lze dodat informace do zaznamu
-			return;
-		}
-	}
-	//jde vpravo (pocetZaznamu - 1 /spravnej index/ + 1 /vpravo od tohoto indexu v poli Potomci/
-	Potomci[pocetZaznamu]->VlozZaznam(zaznam);
 }
 
 void Rstrom::VlozDoListu(Rzaznam *zaznam){
@@ -173,31 +147,35 @@ void Rstrom::VlozDoListu(Rzaznam *zaznam){
 }
 
 void Rstrom::ZkontrolujHranici(int x, int y){
+	ZkontrolujHranici(x, x, y, y);
+}
+
+void Rstrom::ZkontrolujHranici(int l, int r, int u, int d){
 	bool zmena = false;
 
-	if (this->l > x){
-		PosunHranici(vlevo, x);
+	if (this->l > l){
+		PosunHranici(vlevo, l);
 		zmena = true;
 	}
-	if (this->r < x){
-		PosunHranici(vpravo, x);
+	if (this->r < r){
+		PosunHranici(vpravo, r);
 		zmena = true;
 	}
-	if (this->u < y){
-		PosunHranici(nahoru, y);
+	if (this->u < u){
+		PosunHranici(nahoru, u);
 		zmena = true;
 	}
-	if (this->d > y){
-		PosunHranici(dolu, y);
+	if (this->d > d){
+		PosunHranici(dolu, d);
 		zmena = true;
 	}
 
 	//pokud zmena, tak musim prepocitat obsah mbr
 	if (zmena){
-		mbr = VypocitejObsah(l, d, r, u);
+		mbr = VypocitejObsah(this->l, this->d, this->r, this->u);
 		//kdyz posouvam hranici, tak musim zkontrolovat jestli netreba posunout i rodice
 		if (Rodic != NULL){
-			this->Rodic->ZkontrolujHranici(x, y);
+			this->Rodic->ZkontrolujHranici(this->l, this->r, this->u, this->d);
 		}
 	}
 }
@@ -219,7 +197,7 @@ void Rstrom::PosunHranici(strana s, int hodnota){
 	}
 }
 
-/* TODO if (Rodic != NULL) + pridani noveho prvku + rozdeleni do metod */
+/* TODO prvek se pridava hned a pak se teprve rozdeluje... */
 void Rstrom::RozdelList(Rzaznam *zaznam){
 	//Pro kazdy podstrom vybereme jeden zaznam tak, aby byly co nejvice odlisne
 	int levy = 0;
@@ -388,27 +366,24 @@ void Rstrom::RozdelList(Rzaznam *zaznam){
 		}
 	}
 	PreskladejZaznamy();
-	//vysledny obdelnik bude mit velikost toho leveho
+	//vysledny obdelnik bude mit po preskladani velikost toho leveho
 	pocetZaznamu = pocetl;
 	mbr = mbrl;
 
-
+	//TO DO je potreba nahlasit rodicovi ze je tu o potomka vic
 	if (Rodic != NULL){
-		//Rodic->VlozZaznamDoRodice(Zaznamy[stredniIndex], novyList);
 		novyList->Rodic = Rodic;
+		Rodic->VlozUzelDoRodice(novyList);
+		Rodic->ZkontrolujHranici(this->l, this->r, this->u, this->d);
+		Rodic->ZkontrolujHranici(novyList->l, novyList->r, novyList->u, novyList->d);
 	}
 	else{
 		//delim koren
 		Rodic = new Rstrom(this, novyList);
 		Koren = Rodic;
-		//printf("Novy koren - zaznam: %s\n", Koren->Zaznamy[0]->text);
 	}
-
-	//zjistim do ktere stranky bude patrit nove vkladany prvek
-
 }
 
-//metoda presklada zaznamy tak ze vyplni veskera prazna mista vlevo od nejpravejsiho prvu
 void Rstrom::PreskladejZaznamy(){
 	bool zmena = false;
 	for (int i = pocetZaznamu-1; i >= 0; i--){
@@ -457,50 +432,8 @@ void Rstrom::VyberDvaZaznamy(int &l, int &r){
 }
 
 /* TODO */
-void Rstrom::RozdelUzel(Rzaznam *zaznam, Rstrom *RPotomek){
-	//lze udelat jako konstantu - vysledek je zde vzdy stejny
-	int stredniIndex = pocetZaznamu / 2 - 1;
+void Rstrom::RozdelUzel(Rstrom *RPotomek){
 
-	Rzaznam *prostredniPrvek = Zaznamy[stredniIndex];
-	//prvni prvek kterej presunu do novyho uzlu je ten prvni vpravo od prostredniho...
-	Rstrom *novyUzel = new Rstrom(Zaznamy[stredniIndex + 1]);
-	Zaznamy[stredniIndex + 1] = NULL;
-	//jelikoz je rodicem zaznam s indexem stredniIndex+1, tak jiz vetsi zaznam jak tento sem neprijde
-	//vzdy prijde do stromu novyUzel, proto je odkaz presunut tam
-	novyUzel->Potomci[0] = Potomci[stredniIndex + 1];
-	novyUzel->Potomci[0]->Rodic = novyUzel;
-	novyUzel->Potomci[1] = Potomci[stredniIndex + 2];
-	novyUzel->Potomci[1]->Rodic = novyUzel;
-	Potomci[stredniIndex + 2] = NULL;
-	Potomci[stredniIndex + 1] = NULL;
-
-	for (int i = stredniIndex + 2; i < pocetZaznamu; i++){
-		novyUzel->VlozZaznamDoRodice(Zaznamy[i], Potomci[i + 1]);
-		Zaznamy[i] = NULL;
-		Potomci[i + 1] = NULL;
-	}
-
-	/*	osetreno pro vkladani uzlu
-	for (int i = 0; i < novyUzel->pocetZaznamu + 1; i++){
-	novyUzel->Potomci[i]->Rodic = novyUzel;
-	}*/
-
-	//aktualizuju promennou pocetZaznamu, protoze jsem jich ted pulku presunul do jinyho uzlu
-	pocetZaznamu = stredniIndex + 1;
-
-	if (Rodic != NULL){
-		Rodic->VlozZaznamDoRodice(Zaznamy[stredniIndex], novyUzel);
-	}
-	else{
-		//delim koren
-		Rodic = new Rstrom(Zaznamy[stredniIndex], this, novyUzel);
-		Koren = Rodic;
-		//printf("Novy koren - zaznam: %s\n", Koren->Zaznamy[0]->text);
-	}
-
-	novyUzel->Rodic = Rodic;
-
-	//zjistim do ktere stranky bude patrit nove vkladany uzel
 }
 
 bool Rstrom::Vyhledej(int x, int y){
