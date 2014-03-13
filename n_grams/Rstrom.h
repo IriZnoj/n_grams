@@ -32,6 +32,8 @@ public:
 
 class Rstrom{
 private:
+	static Rzaznam *PomocnyPole[K + 1];
+
 	//hranice mbr/stromu
 	int l; //left
 	int u; //up
@@ -40,7 +42,7 @@ private:
 
 	int mbr; //obsah
 
-	int pocetZaznamu;
+	int pocetZaznamu; //v listu se jedna o pocet zaznamu, v nelistovym uzlu jde o pocet potomku
 	Rzaznam *Zaznamy[K];
 	Rstrom *Rodic;
 	Rstrom *Potomci[K + 1];
@@ -57,7 +59,6 @@ private:
 	void VlozDoListu(Rzaznam *zaznam);
 	void RozdelList(Rzaznam *zaznam);
 	void VyberDvaZaznamy(int &l, int &r);
-	void PreskladejZaznamy();
 	void RozdelUzel(Rstrom *RPotomek);
 	bool Vyhledej(Rzaznam *zaznam);
 	bool JeStromList();
