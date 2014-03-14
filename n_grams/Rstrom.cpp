@@ -122,13 +122,61 @@ void Rstrom::VlozUzelDoRodice(Rstrom *RPotomek){
 	ZkontrolujHranici(RPotomek->l, RPotomek->r, RPotomek->u, RPotomek->d);
 }
 
-/* TODO */
 void Rstrom::VlozDoUzlu(Rzaznam *zaznam){
 
-	/* TO DO */
-	//najdi zaznam F tak, ze ObdelnikIndexovehoZaznamuF potrebuje nejmensi rozsireni, 
-	//aby OIZNovehoZaznamu byl podmnizinou OIZF. Prednost ma zaznam s mensim obdelnikem
-	//do N uloz idF
+	//"najdi zaznam F tak, ze ObdelnikIndexovehoZaznamuF potrebuje nejmensi rozsireni, 
+	//aby OIZNovehoZaznamu byl podmnozinou OIZF. Prednost ma zaznam s mensim obdelnikem
+	//do N uloz idF"
+	//pro vsechny potomky vypocitam zmenu
+	bool zmena = false;
+	int leva = this->l;
+	int prava = this->r;
+	int horni = this->u;
+	int dolni = this->d;
+	int Zmeny[K];
+	//Pro vsechny potomky vypocitam velikost zmeny potrebne pro pridani prvku "zaznam"
+	for (int i = 0; i < K; i++){
+		if (leva > zaznam->x){
+			leva = zaznam->x;
+			zmena = true;
+		}
+		else if (prava < zaznam->x){
+			prava = zaznam->x;
+			zmena = true;
+		}
+		if (horni < zaznam->y){
+			horni < zaznam->y;
+			zmena = true;
+		}
+		else if (dolni > zaznam->y){
+			dolni > zaznam->y;
+			zmena = true;
+		}
+		if (zmena){
+			Zmeny[i] = VypocitejObsah(leva, dolni, prava, horni) - Potomci[i]->mbr;
+		}
+		else{
+			Zmeny[i] = 0;
+		}
+	}
+	int nejmensiRozdil = Zmeny[0];
+	int IndexNejmensihoPotomka = 0;
+	//Vyberu potomka, ktery bude muset nejmene menit obdelnik
+	for (int i = 1; i < K; i++){
+		if (Zmeny[i] < nejmensiRozdil){
+			nejmensiRozdil = Zmeny[i];
+			IndexNejmensihoPotomka = i;
+		}
+		//remizi resim vyberem zaznamu s mensim obdelnikem
+		else if (Zmeny[i] == nejmensiRozdil){
+			if (Potomci[i]->mbr < Potomci[IndexNejmensihoPotomka]->mbr){
+				IndexNejmensihoPotomka = i;
+			}
+		}
+	}
+	//mozna bych pak v budoucnu nemusel znovu pocitat hranice a obsah,
+	//ale nenapada me ted jak to efektivne vyresit
+	Potomci[IndexNejmensihoPotomka]->VlozZaznam(zaznam);
 }
 
 void Rstrom::VlozDoListu(Rzaznam *zaznam){
@@ -149,25 +197,7 @@ void Rstrom::ZkontrolujHranici(int x, int y){
 }
 
 void Rstrom::ZkontrolujHranici(int l, int r, int u, int d){
-	bool zmena = false;
-
-	if (this->l > l){
-		PosunHranici(vlevo, l);
-		zmena = true;
-	}
-	if (this->r < r){
-		PosunHranici(vpravo, r);
-		zmena = true;
-	}
-	if (this->u < u){
-		PosunHranici(nahoru, u);
-		zmena = true;
-	}
-	if (this->d > d){
-		PosunHranici(dolu, d);
-		zmena = true;
-	}
-
+	bool zmena = PorovnejAZmen(l, r, u, d);
 	//pokud zmena, tak musim prepocitat obsah mbr
 	if (zmena){
 		mbr = VypocitejObsah(this->l, this->d, this->r, this->u);
@@ -178,21 +208,25 @@ void Rstrom::ZkontrolujHranici(int l, int r, int u, int d){
 	}
 }
 
-void Rstrom::PosunHranici(strana s, int hodnota){
-	switch (s){
-		case vlevo:
-			this->l = hodnota;
-			break;
-		case vpravo:
-			this->r = hodnota;
-			break;
-		case nahoru:
-			this->u = hodnota;
-			break;
-		case dolu:
-			this->d = hodnota;
-			break;
+bool Rstrom::PorovnejAZmen(int l, int r, int u, int d){
+	bool zmena = false;
+	if (this->l > l){
+		this->l = l;
+		zmena = true;
 	}
+	if (this->r < r){
+		this->r = r;
+		zmena = true;
+	}
+	if (this->u < u){
+		this->u = u;
+		zmena = true;
+	}
+	if (this->d > d){
+		this->u = u;
+		zmena = true;
+	}
+	return zmena;
 }
 
 void Rstrom::RozdelList(Rzaznam *zaznam){

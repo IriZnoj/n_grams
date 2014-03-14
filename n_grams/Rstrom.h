@@ -30,10 +30,11 @@ public:
 	Rzaznam(int x, int y);
 };
 
+//staticka pomocna promenna
+static Rzaznam *PomocnyPole[K + 1];
+
 class Rstrom{
 private:
-	static Rzaznam *PomocnyPole[K + 1];
-
 	//hranice mbr/stromu
 	int l; //left
 	int u; //up
@@ -54,7 +55,7 @@ private:
 	void VlozDoUzlu(Rzaznam *zaznam);
 	void ZkontrolujHranici(int x, int y);
 	void ZkontrolujHranici(int l, int r, int u, int d);
-	void PosunHranici(strana, int hodnota);
+	bool PorovnejAZmen(int l, int r, int u, int d);
 	int VypocitejObsah(int ax, int ay, int bx, int by);
 	void VlozDoListu(Rzaznam *zaznam);
 	void RozdelList(Rzaznam *zaznam);
