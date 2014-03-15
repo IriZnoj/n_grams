@@ -29,6 +29,16 @@ Rstrom::Rstrom(int x, int y){
 	VytvoreniStromu(z);
 }
 
+Rstrom::Rstrom(Rstrom *Potomek){
+	Potomci[0] = Potomek;
+	Potomci[0]->Rodic = this;
+	this->l = Potomci[0]->l;
+	this->r = Potomci[0]->r;
+	this->d = Potomci[0]->d;
+	this->u = Potomci[0]->u;
+	mbr = 0;
+}
+
 Rstrom::Rstrom(Rstrom *LPotomek, Rstrom *RPotomek){
 	Potomci[0] = LPotomek;
 	//uz jem nastavil pred volanim teto metody
@@ -71,8 +81,6 @@ void Rstrom::inicializace(){
 		Potomci[i] = NULL;
 		Zaznamy[i] = NULL;
 	}
-	//potomku je o 1 vic nez zaznamu
-	Potomci[K] = NULL;
 }
 
 void Rstrom::VytvoreniStromu(Rzaznam *z){
@@ -108,7 +116,7 @@ void Rstrom::VlozZaznam(int x, int y){
 	Koren->VlozZaznam(zaznam);
 }
 
-void Rstrom::VlozUzelDoRodice(Rstrom *RPotomek){
+void Rstrom::VlozUzel(Rstrom *RPotomek){
 	if (pocetZaznamu == K){
 		//je potreba uzel rozdelit na dva
 		RozdelUzel(RPotomek);
@@ -167,7 +175,7 @@ void Rstrom::VlozDoUzlu(Rzaznam *zaznam){
 			nejmensiRozdil = Zmeny[i];
 			IndexNejmensihoPotomka = i;
 		}
-		//remizi resim vyberem zaznamu s mensim obdelnikem
+		//remizu resim vyberem zaznamu s mensim obdelnikem
 		else if (Zmeny[i] == nejmensiRozdil){
 			if (Potomci[i]->mbr < Potomci[IndexNejmensihoPotomka]->mbr){
 				IndexNejmensihoPotomka = i;
@@ -245,7 +253,6 @@ void Rstrom::RozdelList(Rzaznam *zaznam){
 	}
 	PomocnyPole[K] = zaznam;
 	VyberDvaZaznamy(levy, pravy);
-	//je potreba otestovat jestli by levy ci pravy zaznam nemel byt nove vkladany prvek
 	//levy zustava, pravy presunu
 
 	Rstrom *novyList = new Rstrom(PomocnyPole[pravy]);
@@ -402,7 +409,7 @@ void Rstrom::RozdelList(Rzaznam *zaznam){
 	}
 
 	if (Rodic != NULL){
-		Rodic->VlozUzelDoRodice(novyList);
+		Rodic->VlozUzel(novyList);
 	}
 	else{
 		//delim koren
@@ -438,9 +445,204 @@ void Rstrom::VyberDvaZaznamy(int &l, int &r){
 	}
 }
 
-/* TODO */
-void Rstrom::RozdelUzel(Rstrom *RPotomek){
+void Rstrom::VyberDvaUzly(int &l, int &r){
+	int nejvetsiObsah = 0;
+	int obsah = 0;
+	for (int i = 0; i < K + 1; i++){
+		for (int j = 0; j < K + 1; j++){
+			//PomocnyPole obsahuje veskere Potomky + prave vkladany uzel
+			obsah = VypocitejObsah(PomocnyPoleUzlu[i]->l, PomocnyPoleUzlu[i]->d, PomocnyPoleUzlu[j]->r, PomocnyPoleUzlu[j]->u);
+			if (obsah > nejvetsiObsah){
+				nejvetsiObsah = obsah;
+				l = i;
+				r = j;
+			}
+		}
+	}
+}
 
+void Rstrom::RozdelUzel(Rstrom *RPotomek){
+	//Pro kazdy podstrom vybereme jeden uzel tak, aby byly co nejvice odlisne
+	int levy = 0;
+	int pravy = 0;
+	//KvadratickySplit-------------------------------------------------------------------
+		//upravit pocet prvku, zmensit hranice MBR a prepocitat obsah - tedy mbr
+	for (int i = 0; i < K; i++){
+		PomocnyPoleUzlu[i] = this->Potomci[i];
+		this->Potomci[i] = NULL;
+	}
+	PomocnyPoleUzlu[K] = RPotomek;
+	VyberDvaUzly(levy, pravy);
+	//levy zustava, pravy presunu
+
+	Rstrom *novyUzel = new Rstrom(PomocnyPoleUzlu[pravy]);
+
+	//zjistim na kterou stranu budou jednotlive zaznamy lepe pasovat
+	int ll = this->l = PomocnyPoleUzlu[levy]->l;
+	int lr = this->r = PomocnyPoleUzlu[levy]->r;
+	int lu = this->u = PomocnyPoleUzlu[levy]->u;
+	int ld = this->d = PomocnyPoleUzlu[levy]->d;
+	int mbrl = this->mbr = 0;
+	int pocetl = this->pocetZaznamu = 1;
+	int zmenal[K + 1];
+	int obsahl = 0;
+
+	int rl = PomocnyPoleUzlu[pravy]->l;
+	int rr = PomocnyPoleUzlu[pravy]->r;
+	int ru = PomocnyPoleUzlu[pravy]->u;
+	int rd = PomocnyPoleUzlu[pravy]->d;
+	int mbrr = 0;
+	int pocetr = 1;
+	int zmenar[K + 1];
+	int obsahr = 0;
+
+	//je treba vypocitat jak moc zalezi do ktereho listu ktery zaznam umistim.
+	//ty, u kterych je rozdil nejvyssi, pak budu prirazovat do prislusnych listu nejdrive
+	int rozdily[K + 1];
+	rozdily[levy] = 0;
+	rozdily[pravy] = 0;
+
+	for (int i = 0; i < K + 1; i++){
+		//prochazim jen zaznamy ktere jsem jeste nepriradil
+		if (i != levy && i != pravy){
+			//posunuji vlevo
+			if (PomocnyPoleUzlu[i]->l < ll){
+				ll = PomocnyPoleUzlu[i]->l;
+			}
+			//posunuji vpravo
+			if (PomocnyPoleUzlu[i]->r > lr){
+				lr = PomocnyPoleUzlu[i]->r;
+			}
+			//posunuji dolu
+			if (PomocnyPoleUzlu[i]->d < ld){
+				ld = PomocnyPoleUzlu[i]->d;
+			}
+			//posunuji nahoru
+			if(PomocnyPoleUzlu[i]->u > lu){
+				lu = PomocnyPoleUzlu[i]->u;
+			}
+			//-------------------------------------------------
+			//posunuji vlevo
+			if (PomocnyPoleUzlu[i]->l < rl){
+				rl = PomocnyPoleUzlu[i]->l;
+			}
+			//posunuji vpravo
+			if (PomocnyPoleUzlu[i]->r > rr){
+				rr = PomocnyPoleUzlu[i]->r;
+			}
+			//posunuji dolu
+			if (PomocnyPoleUzlu[i]->d < rd){
+				rd = PomocnyPoleUzlu[i]->d;
+			}
+			//posunuji nahoru
+			if (PomocnyPoleUzlu[i]->u > ru){
+				ru = PomocnyPoleUzlu[i]->u;
+			}
+			//-------------------------------------------------
+			obsahl = VypocitejObsah(ll, ld, lr, lu);
+			zmenal[i] = obsahl - mbr;
+			if (zmenal[i] < 0){
+				zmenal[i] = -1 * zmenal[i];
+			}
+			obsahr = VypocitejObsah(rl, rd, rr, ru);
+			zmenar[i] = obsahr - mbrr;
+			if (zmenar < 0){
+				zmenar[i] = -1 * zmenar[i];
+			}
+
+			rozdily[i] = zmenal[i] - zmenar[i];
+			//absolutni hodnota
+			if (rozdily[i] < 0){
+				rozdily[i] = -1 * rozdily[i];
+			}
+
+			//znovu je treba obnovit minimalni hranice ktere jsou potreba
+			int ll = PomocnyPoleUzlu[levy]->l;
+			int lr = PomocnyPoleUzlu[levy]->r;
+			int lu = PomocnyPoleUzlu[levy]->u;
+			int ld = PomocnyPoleUzlu[levy]->d;
+
+			int rl = PomocnyPoleUzlu[pravy]->l;
+			int rr = PomocnyPoleUzlu[pravy]->r;
+			int ru = PomocnyPoleUzlu[pravy]->u;
+			int rd = PomocnyPoleUzlu[pravy]->d;
+		} //konec if (i != levy && i != pravy)
+	} //konec for (int i = 0; i < K; i++)
+
+	int poradi[K + 1];
+	int nejvetsi = rozdily[0];
+	//urci poradi pro kazdy zaznam v zavislosti na dulezitosti vyberu listu
+	//do ktereho dany zaznam bude patrit
+	for (int i = 0; i < K + 1; i++){
+		for (int j = 0; j < K + 1; j++){
+			if (rozdily[j] > nejvetsi){
+				poradi[i] = j;
+				rozdily[j] = 0;
+			}
+		}
+	}
+	//podle dulezitosti prirazuji prvky
+	for (int p = 0; p < K + 1; p++){
+		int i = poradi[p];
+		//preskocim 2 prvky ktery uz v jednom z listu jsou
+		if ((i == levy) || (i == pravy)){
+			continue;
+		}
+		//aby byla dodrzena podminka minimalniho poctu zaznamu v kazdem listu...
+		if (p - pocetl == m){
+			//zbytek musi prijit vlevo
+			VlozUzel(PomocnyPoleUzlu[i]);
+			pocetl++;
+		}
+		else if (p - pocetr == m){
+			//zbytek musi prijit vpravo
+			novyUzel->VlozUzel(PomocnyPoleUzlu[i]);
+			pocetr++;
+		}
+		//porovnani obsahu a prirazeni zaznamu
+		//vkladam vlevo
+		if (zmenal < zmenar){
+			VlozUzel(PomocnyPoleUzlu[i]);
+			pocetl++;
+		}
+		//vkladam vpravo
+		else if (zmenal > zmenar){
+			novyUzel->VlozUzel(PomocnyPoleUzlu[i]);
+			pocetr++;
+		}
+		//zmena bude stejna - vyberu tridu s mensim obdelnikem
+		else{
+			//vkladam vlevo
+			if (obsahl < obsahr){
+				VlozUzel(PomocnyPoleUzlu[i]);
+				pocetl++;
+			}
+			//vkladam vpravo
+			else if (obsahl > obsahr){
+				novyUzel->VlozUzel(PomocnyPoleUzlu[i]);
+				pocetr++;
+			}
+			//pokud i obsahy jsou stejne, pak vkladam do toho listu, kde je mene zaznamu
+			else{
+				//vkladam vpravo
+				if (this->pocetZaznamu > novyUzel->pocetZaznamu){
+					novyUzel->VlozUzel(PomocnyPoleUzlu[i]);
+					pocetr++;
+				}
+				VlozUzel(PomocnyPoleUzlu[i]);
+				pocetl++;
+			}
+		}
+	}
+
+	if (Rodic != NULL){
+		Rodic->VlozUzel(novyUzel);
+	}
+	else{
+		//delim koren
+		Rodic = new Rstrom(this, novyUzel);
+		Koren = Rodic;
+	}
 }
 
 bool Rstrom::Vyhledej(int x, int y){

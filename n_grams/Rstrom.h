@@ -32,6 +32,7 @@ public:
 
 //staticka pomocna promenna
 static Rzaznam *PomocnyPole[K + 1];
+static Rstrom *PomocnyPoleUzlu[K + 1];
 
 class Rstrom{
 private:
@@ -46,12 +47,12 @@ private:
 	int pocetZaznamu; //v listu se jedna o pocet zaznamu, v nelistovym uzlu jde o pocet potomku
 	Rzaznam *Zaznamy[K];
 	Rstrom *Rodic;
-	Rstrom *Potomci[K + 1];
+	Rstrom *Potomci[K];
 
 	void inicializace();
 	void VytvoreniStromu(Rzaznam *z);
 	void VlozZaznam(Rzaznam *zaznam);
-	void VlozUzelDoRodice(Rstrom *RPotomek);
+	void VlozUzel(Rstrom *RPotomek);
 	void VlozDoUzlu(Rzaznam *zaznam);
 	void ZkontrolujHranici(int x, int y);
 	void ZkontrolujHranici(int l, int r, int u, int d);
@@ -60,6 +61,7 @@ private:
 	void VlozDoListu(Rzaznam *zaznam);
 	void RozdelList(Rzaznam *zaznam);
 	void VyberDvaZaznamy(int &l, int &r);
+	void VyberDvaUzly(int &l, int &r);
 	void RozdelUzel(Rstrom *RPotomek);
 	bool Vyhledej(Rzaznam *zaznam);
 	bool JeStromList();
@@ -68,6 +70,7 @@ public:
 	Rstrom();
 	Rstrom(int x, int y);
 	Rstrom(Rzaznam *z);
+	Rstrom(Rstrom *Potomek);
 	Rstrom(Rstrom *LPotomek, Rstrom *RPotomek);
 	void VlozZaznam(int x, int y);
 	void VlozPrvniZaznam(int x, int y);
