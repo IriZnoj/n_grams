@@ -5,7 +5,7 @@
 //jako klic budu pouzivat int
 static const int MAX_INT = 2147483647;
 //K udava pocet zaznamu ve strankach/uzlech/podstromech
-//Napr. pro K=4 budou v kazdem podstromu 2-4 zaznamy a az 5 potomku
+//Napr. pro K=4 budou v kazdem podstromu 2-4 zaznamy a az 4 potomci
 static const int K = 4;
 //m je nejmensi pocet zaznamu v listu
 static const int m = 2;
@@ -57,6 +57,8 @@ private:
 	void ZkontrolujHranici(int x, int y);
 	void ZkontrolujHranici(int l, int r, int u, int d);
 	bool PorovnejAZmen(int l, int r, int u, int d);
+	void VypoctiNoveHranice(int &l, int &r, int &u, int &d, int x, int y);
+	int DalsiPrvek(Rstrom *strom, bool prepocitatLevy, bool prepocitatPravy, int zmenal[], int zmenar[]);
 	int VypocitejObsah(int ax, int ay, int bx, int by);
 	void VlozDoListu(Rzaznam *zaznam);
 	void RozdelList(Rzaznam *zaznam);
@@ -65,6 +67,8 @@ private:
 	void RozdelUzel(Rstrom *RPotomek);
 	bool Vyhledej(Rzaznam *zaznam);
 	bool JeStromList();
+	void VypisPolozky();
+	void VypisZaznamySPotomky(int hloubka);
 
 public:
 	Rstrom();
@@ -75,8 +79,6 @@ public:
 	void VlozZaznam(int x, int y);
 	void VlozPrvniZaznam(int x, int y);
 	bool Vyhledej(int x, int y);
-	void VypisPolozky(Rstrom *strom);
 	void Vypis();
 	void UkazStrom();
-	void VypisZaznamySPotomky();
 };
