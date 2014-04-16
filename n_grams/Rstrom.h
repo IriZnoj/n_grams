@@ -11,11 +11,8 @@ static const int K = 4;
 static const int m = 2;
 //maximalni velikost zaznamu--------------------------------------!!!
 static const int MAX_SLOVO = 75;
-
-typedef enum{
-	vlevo, vpravo, nahoru, dolu
-} strana;
-
+//maximalni Dimenze pro zaznam Rstromu (pocet cisel oddelenych mezerou ve vstupnim retezci)
+static const int D = 5;
 
 class Rstrom;
 static Rstrom *Koren;
@@ -23,11 +20,16 @@ static Rstrom *Koren;
 class Rzaznam{
 
 public:
+	int souradnice[D];
+	//pocet cisel v poli
+	int dimenze;
 	int x;
 	int y;
 	Rstrom *mbr;
 	//Rzaznam *Soused;
-	Rzaznam(int x, int y);
+	Rzaznam(int souradnice[], int velikost);
+	Rzaznam(char *retezec);
+	void RetezecNaCisla(char *retezec);
 };
 
 //staticka pomocna promenna
@@ -36,11 +38,10 @@ static Rstrom *PomocnyPoleUzlu[K + 1];
 
 class Rstrom{
 private:
-	//hranice mbr/stromu
-	int l; //left
-	int u; //up
-	int r; //right
-	int d; //down
+	//hranice mbr/stromu, D = dimenze, 2 => min(0) && max(1)
+	int hranice[D][2];
+	//dimenze = max(dimenze jakehokoli potomka)
+	int dimenze;
 
 	int mbr; //obsah
 
@@ -54,13 +55,19 @@ private:
 	void VlozZaznam(Rzaznam *zaznam);
 	void VlozUzel(Rstrom *potomek);
 	void VlozDoUzlu(Rzaznam *zaznam);
-	void ZkontrolujHranici(int x, int y);
-	void ZkontrolujHranici(int l, int r, int u, int d);
-	bool PorovnejAZmen(int l, int r, int u, int d);
+	int Max(int a, int b);
+	int Min(int a, int b);
+	int VetsiSouradnice(Rstrom *LPotomek, Rstrom *RPotomek, int dimenze);
+	int MensiSouradnice(Rstrom *lPotomek, Rstrom *RPotomek, int dimenze);
+	void ZkontrolujHranici(int hranice[], int dimenze);
+	void ZkontrolujHranici(int hranice[][2], int dimenze);
+	bool PorovnejAZmen(int hranice[], int dimenze);
+	bool PorovnejAZmen(int hranice[][2], int dimenze);
+	void PrepocitejObsah(); 
 	void VypoctiHranice(int &l, int &r, int &u, int &d, int x, int y);
 	void VypoctiHraniceUzlu(int &l, int &r, int &u, int &d, Rstrom *strom);
 	int DalsiPrvek(Rstrom *strom, bool prepocitatLevy, bool prepocitatPravy, int zmenal[], int zmenar[]);
-	int VypocitejObsah(int ax, int ay, int bx, int by);
+	int VypocitejObsah(int hranice[][2], int dimenze);
 	void VlozDoListu(Rzaznam *zaznam);
 	void RozdelList(Rzaznam *zaznam);
 	void VyberDvaZaznamy(int &l, int &r);
@@ -73,13 +80,15 @@ private:
 
 public:
 	Rstrom();
-	Rstrom(int x, int y);
+	Rstrom(char *souradnice);
 	Rstrom(Rzaznam *z);
 	Rstrom(Rstrom *potomek);
 	Rstrom(Rstrom *LPotomek, Rstrom *RPotomek);
-	void VlozZaznam(int x, int y);
-	void VlozPrvniZaznam(int x, int y);
-	bool Vyhledej(int x, int y);
+	void VlozZaznam(char *souradnice);
+	void VlozZaznam(int souradnice[], int velikost);
+	void VlozPrvniZaznam(char *souradnice);
+	void VlozPrvniZaznam(int souradnice[], int velikost);
+	bool Vyhledej(char *souradnice);
 	void Vypis();
 	void UkazStrom();
 };
