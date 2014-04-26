@@ -23,8 +23,6 @@ public:
 	int souradnice[D];
 	//pocet cisel v poli
 	int dimenze;
-	int x;
-	int y;
 	Rstrom *mbr;
 	//Rzaznam *Soused;
 	Rzaznam(int souradnice[], int velikost);
@@ -64,8 +62,10 @@ private:
 	bool PorovnejAZmen(int hranice[], int dimenze);
 	bool PorovnejAZmen(int hranice[][2], int dimenze);
 	void PrepocitejObsah(); 
+	int VypoctiHranice(int puvodni[][2], int dim_puvodni, int nova[][2], int dim_nova);
+	int VypoctiHranice(int puvodni[][2], int dim_puvodni, int nova[], int dim_nova);
 	void VypoctiHranice(int &l, int &r, int &u, int &d, int x, int y);
-	void VypoctiHraniceUzlu(int &l, int &r, int &u, int &d, Rstrom *strom);
+	int Rstrom::VypoctiHraniceUzlu(int puvodni[][2], int dim_puvodni, Rstrom *strom);
 	int DalsiPrvek(Rstrom *strom, bool prepocitatLevy, bool prepocitatPravy, int zmenal[], int zmenar[]);
 	int VypocitejObsah(int hranice[][2], int dimenze);
 	void VlozDoListu(Rzaznam *zaznam);

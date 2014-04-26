@@ -21,6 +21,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 //#include "Bstrom.h"
 #include "Rstrom.h"
@@ -66,33 +67,21 @@ int main(){
 
 	//--------------------Rstrom--------------------
 	//delkarace promennych
-	int x = 0;
+	int souradnice[] = {0, 0, 0, 0, 0};
+	char string[255];
 	int y = 0;
 	Rstrom Strom;
 
-	int a = scanf("%d", &x);
-	int b = scanf("%d", &y);
-	printf("ukladam do stromu: %d, %d\n", x, y);
-	Strom.VlozPrvniZaznam(x, y);
+	int a = scanf("%d", &souradnice[0]);
+	int b = scanf("%d", &souradnice[1]);
+	printf("ukladam do stromu: %d, %d\n", souradnice[0], souradnice[1]);
+	Strom.VlozPrvniZaznam(souradnice, 2);
 
-
-	a = scanf("%d", &x);
-	if (a <= 0){
-		b = -1;
-	}
-	else{
-		b = scanf("%d", &y);
-	}
-
-	while (b > 0){
-		printf("ukladam do stromu: %d, %d\n", x, y);
-		Strom.VlozZaznam(x, y);
-		a = scanf("%d", &x);
-		if (a <= 0){
-			break;
-		}
-
-		b = scanf("%d", &y);
+	fgets(string, sizeof(string)-1, stdin);
+	while (fgets(string, sizeof(string)-1, stdin)){
+		strtok(string, "\n");
+		printf("ukladam do stromu: %s\n", string);
+		Strom.VlozZaznam(string);
 	}
 
 	Strom.Vypis();
