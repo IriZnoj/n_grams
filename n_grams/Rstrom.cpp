@@ -20,6 +20,7 @@ Rzaznam::Rzaznam(char * retezec){
 	this->dimenze = 0;
 	//prevod retezce na souradnice
 	RetezecNaCisla(retezec);
+	printf("dimenze: %d\n", dimenze);
 	//Soused = NULL;
 }
 
@@ -300,14 +301,22 @@ bool Rstrom::PorovnejAZmen(int hranice[], int dimenze){
 	bool zmena = false;
 	for (int i = 0; i < dimenze; i++){
 		//pokud je nova hranice i-teho rozmeru mensi nez soucasna spodni hranice, pak
-		//je treba oznamit zmenu a hranici prepsat. Stejnym zpusobem menime i horni hranici
-		if (hranice[i] < this->hranice[i][0]){
+		//je treba oznamit zmenu a hranici prepsat. Stejnym zpusobem menime i horni hranici.
+		if (i >= this->dimenze){
 			this->hranice[i][0] = hranice[i];
+			this->hranice[i][1] = hranice[i];
+			this->dimenze++;
 			zmena = true;
 		}
-		if (hranice[i] > this->hranice[i][1]){
-			this->hranice[i][1] = hranice[i];
-			zmena = true;
+		else{
+			if (hranice[i] < this->hranice[i][0]){
+				this->hranice[i][0] = hranice[i];
+				zmena = true;
+			}
+			if (hranice[i] > this->hranice[i][1]){
+				this->hranice[i][1] = hranice[i];
+				zmena = true;
+			}
 		}
 	}
 	return zmena;
@@ -628,8 +637,8 @@ void Rstrom::VyberDvaZaznamy(int &l, int &r){
 			for (int k = PomocnyPole[j]->dimenze; k < D; k++){
 				pom_souradnice[k][1] = 0;
 			}
-			//Max vybira maximalni dimenzi
-			obsah = VypocitejObsah(pom_souradnice, Max(PomocnyPole[i]->dimenze, PomocnyPole[j]->dimenze));
+			//Min vybira minimalni dimenzi - beru v potaz jen spolecny dimenze
+			obsah = VypocitejObsah(pom_souradnice, Min(PomocnyPole[i]->dimenze, PomocnyPole[j]->dimenze));
 			if (obsah > nejvetsiObsah){
 				nejvetsiObsah = obsah;
 				l = i;
@@ -837,11 +846,11 @@ void Rstrom::VypisPolozky(){
 	}
 	else{
 		for (int i = 0; i < pocetZaznamu; i++){
-			printf("zaznam: %d, dimenze: (%d) -> ", i, dimenze);
-			for (int j = 0; j < dimenze - 1; j++){
+			printf("zaznam: %d, dimenze: (%d) -> ", i, Zaznamy[i]->dimenze);
+			for (int j = 0; j < Zaznamy[i]->dimenze - 1; j++){
 				printf("%d, ", Zaznamy[i]->souradnice[j]);
 			}
-			printf("%d\n", Zaznamy[i]->souradnice[dimenze - 1]);
+			printf("%d\n", Zaznamy[i]->souradnice[Zaznamy[i]->dimenze - 1]);
 		}
 		for (int i = 0; i < dimenze-1; i++){
 			printf("%d - %d, ", hranice[i][0], hranice[i][1]);
@@ -865,9 +874,10 @@ void Rstrom::VypisZaznamySPotomky(int hloubka){
 		for (int i = 0; i < hloubka; i++){
 			printf("  ");
 		}
-		printf("%d) (node) ", hloubka);
+		printf("%d) (node), ", hloubka);
+		printf("dimenze: ", dimenze);
 		for (int j = 0; j < dimenze - 1; j++){
-			printf("%d: %d - %d ", j, hranice[j][0], hranice[j][1]);
+			printf("%d: %d - %d,\n ", j, hranice[j][0], hranice[j][1]);
 		}
 		printf("%d: %d - %d\n", dimenze - 1, hranice[dimenze - 1][0], hranice[dimenze - 1][1]);
 
@@ -891,11 +901,11 @@ void Rstrom::VypisZaznamySPotomky(int hloubka){
 			for (int i = 0; i < hloubka; i++){
 				printf("  ");
 			}
-			printf("zaznam: %d, dimenze: (%d) -> ", i, dimenze);
-			for (int j = 0; j < dimenze - 1; j++){
+			printf("zaznam: %d, dimenze: (%d) -> ", i, Zaznamy[i]->dimenze);
+			for (int j = 0; j < Zaznamy[i]->dimenze - 1; j++){
 				printf("%d, ", Zaznamy[i]->souradnice[j]);
 			}
-			printf("%d\n", Zaznamy[i]->souradnice[dimenze - 1]);
+			printf("%d\n", Zaznamy[i]->souradnice[Zaznamy[i]->dimenze - 1]);
 		}
 	}
 }
