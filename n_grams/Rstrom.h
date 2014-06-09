@@ -13,9 +13,12 @@ static const int m = 2;
 static const int MAX_SLOVO = 75;
 //maximalni Dimenze pro zaznam Rstromu (pocet cisel oddelenych mezerou ve vstupnim retezci)
 static const int D = 5;
+//max mbr musi byt v rozsahu  MAX_LONG_LONG, coz znamena,
+//ze maximalni cislo by mela byt D-ta odmocnina z  MAX_LONG_LONG
 
 class Rstrom;
 static Rstrom *Koren;
+static int PocetPolozek = 0;
 
 class Rzaznam{
 
@@ -41,7 +44,7 @@ private:
 	//dimenze = max(dimenze jakehokoli potomka)
 	int dimenze;
 
-	int mbr; //obsah
+	long long mbr; //obsah
 
 	int pocetZaznamu; //v listu se jedna o pocet zaznamu, v nelistovym uzlu jde o pocet potomku
 	Rzaznam *Zaznamy[K];
@@ -66,8 +69,8 @@ private:
 	int VypoctiHranice(int puvodni[][2], int dim_puvodni, int nova[], int dim_nova);
 	void VypoctiHranice(int &l, int &r, int &u, int &d, int x, int y);
 	int Rstrom::VypoctiHraniceUzlu(int puvodni[][2], int dim_puvodni, Rstrom *strom);
-	int DalsiPrvek(Rstrom *strom, bool prepocitatLevy, bool prepocitatPravy, int zmenal[], int zmenar[]);
-	int VypocitejObsah(int hranice[][2], int dimenze);
+	int DalsiPrvek(Rstrom *strom, bool prepocitatLevy, bool prepocitatPravy,  long long zmenal[],  long long zmenar[]);
+	 long long VypocitejObsah(int hranice[][2], int dimenze);
 	void VlozDoListu(Rzaznam *zaznam);
 	void RozdelList(Rzaznam *zaznam);
 	void VyberDvaZaznamy(int &l, int &r);

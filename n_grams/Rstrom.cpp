@@ -18,9 +18,13 @@ Rzaznam::Rzaznam(char * retezec){
 	this->mbr = NULL;
 	//dimenze bude nastavena pri prevodu
 	this->dimenze = 0;
+	if (retezec[0] == '\n'){
+		//printf("omylem stisknuty enter\n");
+		return;
+	}
 	//prevod retezce na souradnice
 	RetezecNaCisla(retezec);
-	printf("dimenze: %d\n", dimenze);
+	//printf("dimenze: %d\n", dimenze);
 	//Soused = NULL;
 }
 
@@ -31,7 +35,11 @@ void Rzaznam::RetezecNaCisla(char *retezec){
 	while (sscanf(retezec, "%d%n", &cislo, &offset) == 1){
 		this->souradnice[this->dimenze++] = cislo;
 		retezec += offset;
-		printf("cislo: %d\n", cislo);
+		if (dimenze >= D){
+			//printf("dimenze %d >= D\n", dimenze);
+			return;
+		}
+		//printf("cislo: %d\n", cislo);
 	}
 }
 
@@ -82,7 +90,7 @@ Rstrom::Rstrom(Rstrom *LPotomek, Rstrom *RPotomek){
 		hranice[i][1] = VetsiSouradnice(LPotomek, RPotomek, i);
 	}
 
-	mbr = VypocitejObsah(hranice, dimenze);
+	mbr = VypocitejObsah(hranice, Min(LPotomek->dimenze, RPotomek->dimenze));
 	pocetZaznamu = 2;
 }
 
@@ -129,7 +137,14 @@ void Rstrom::VlozZaznam(Rzaznam *zaznam){
 
 void Rstrom::VlozZaznam(char *souradnice){
 	Rzaznam *zaznam = new Rzaznam(souradnice);
-	Koren->VlozZaznam(zaznam);
+	if (zaznam->dimenze != 0){
+		if (Koren->Vyhledej(zaznam)){
+			//printf("duplicita\n");
+		}
+		else{
+			Koren->VlozZaznam(zaznam);
+		}
+	}
 }
 
 void Rstrom::VlozZaznam(int souradnice[], int velikost){
@@ -138,18 +153,16 @@ void Rstrom::VlozZaznam(int souradnice[], int velikost){
 }
 
 void Rstrom::VlozUzel(Rstrom *potomek){
+	potomek->Rodic = this;
 	if (pocetZaznamu == K){
 		//je potreba uzel rozdelit na dva
 		RozdelUzel(potomek);
 		return;
 	}
 	Potomci[pocetZaznamu] = potomek;
-	if (potomek != NULL){
-		potomek->Rodic = this;
-	}
+	pocetZaznamu++;
 	//uprava hranic pokud je treba
 	ZkontrolujHranici(potomek->hranice, potomek->dimenze);
-	pocetZaznamu++;
 }
 
 void Rstrom::VlozDoUzlu(Rzaznam *zaznam){
@@ -159,13 +172,13 @@ void Rstrom::VlozDoUzlu(Rzaznam *zaznam){
 	//pro vsechny potomky vypocitam zmenu
 	bool zmena = false;
 	int pom_souradnice[D][2];
-	int Zmeny[K];
+	 long long Zmeny[K];
 	//Pro vsechny potomky vypocitam velikost zmeny potrebne pro pridani prvku "zaznam"
 	for (int i = 0; i < pocetZaznamu; i++){
-		for (int j = 0; j < Min(dimenze, zaznam->dimenze); j++){
+		for (int j = 0; j < Min(Potomci[i]->dimenze, zaznam->dimenze); j++){
 			//inicializace prom. na hodnotu aktualnich hranic mbr uzlu
-			pom_souradnice[j][0] = hranice[j][0];
-			pom_souradnice[j][1] = hranice[j][1];
+			pom_souradnice[j][0] = Potomci[i]->hranice[j][0];
+			pom_souradnice[j][1] = Potomci[i]->hranice[j][1];
 			//pokud jsou souradnice nove pridavaneho prvku mimo rozsah hranic aktualniho uzlu
 			//pak v pripade pridani je treba hranice rozsirit
 			if (pom_souradnice[j][0] > zaznam->souradnice[j]){
@@ -178,7 +191,7 @@ void Rstrom::VlozDoUzlu(Rzaznam *zaznam){
 			}
 		}
 		//pokud ma vkladany vetsi dimenzi...
-		if (zaznam->dimenze > dimenze){
+		if (zaznam->dimenze > Potomci[i]->dimenze){
 			for (int j = dimenze; j < zaznam->dimenze; j++){
 				pom_souradnice[j][0] = zaznam->souradnice[j];
 				pom_souradnice[j][1] = zaznam->souradnice[j];
@@ -189,18 +202,19 @@ void Rstrom::VlozDoUzlu(Rzaznam *zaznam){
 		}
 		//inicializace zbyvajicich souradnic
 		else{
-			for (int j = zaznam->dimenze; j < dimenze; j++){
-				pom_souradnice[j][0] = hranice[j][0];
-				pom_souradnice[j][1] = hranice[j][1];
+			for (int j = zaznam->dimenze; j < Potomci[i]->dimenze; j++){
+				pom_souradnice[j][0] = Potomci[i]->hranice[j][0];
+				pom_souradnice[j][1] = Potomci[i]->hranice[j][1];
 			}
 		}
 		//vynulovani zbyvajicich souradnic
-		for (int j = Max(dimenze, zaznam->dimenze); j < D; j++){
+		for (int j = Max(Potomci[i]->dimenze, zaznam->dimenze); j < D; j++){
 			pom_souradnice[j][0] = 0;
 			pom_souradnice[j][1] = 0;
 		}
+		
 		if (zmena){
-			Zmeny[i] = VypocitejObsah(pom_souradnice, Max(dimenze, zaznam->dimenze)) - Potomci[i]->mbr;
+			Zmeny[i] = VypocitejObsah(pom_souradnice, Max(Potomci[i]->dimenze, zaznam->dimenze)) - Potomci[i]->mbr;
 		}
 		else{
 			Zmeny[i] = 0;
@@ -208,7 +222,7 @@ void Rstrom::VlozDoUzlu(Rzaznam *zaznam){
 
 		zmena = false;
 	}
-	int nejmensiRozdil = Zmeny[0];
+	 long long nejmensiRozdil = Zmeny[0];
 	int IndexNejmensihoPotomka = 0;
 	//Vyberu potomka, ktery bude muset nejmene menit obdelnik
 	for (int i = 1; i < pocetZaznamu; i++){
@@ -257,23 +271,23 @@ int Rstrom::Min(int a, int b){
 
 int Rstrom::VetsiSouradnice(Rstrom *LPotomek, Rstrom *RPotomek, int dimenze){
 	//vrati vetsi souradnici pokud obe spadaji do dimenze, pokud ne, tak vrati tu co spada
-	if (dimenze <= LPotomek->dimenze){
-		if (dimenze <= RPotomek->dimenze){
+	if (dimenze < LPotomek->dimenze){
+		if (dimenze < RPotomek->dimenze){
 			return Max(LPotomek->hranice[dimenze][1], RPotomek->hranice[dimenze][1]);
 		}
 		return LPotomek->hranice[dimenze][1];
 	}
-	RPotomek->hranice[dimenze][1];
+	return RPotomek->hranice[dimenze][1];
 }
 
 int Rstrom::MensiSouradnice(Rstrom *LPotomek, Rstrom *RPotomek, int dimenze){
-	if (dimenze <= LPotomek->dimenze){
-		if (dimenze <= RPotomek->dimenze){
+	if (dimenze < LPotomek->dimenze){
+		if (dimenze < RPotomek->dimenze){
 			return Min(LPotomek->hranice[dimenze][0], RPotomek->hranice[dimenze][0]);
 		}
 		return LPotomek->hranice[dimenze][0];
 	}
-	RPotomek->hranice[dimenze][0];
+	return RPotomek->hranice[dimenze][0];
 }
 
 void Rstrom::ZkontrolujHranici(int hranice[], int dimenze){
@@ -325,13 +339,21 @@ bool Rstrom::PorovnejAZmen(int hranice[], int dimenze){
 bool Rstrom::PorovnejAZmen(int hranice[][2], int dimenze){
 	bool zmena = false;
 	for (int i = 0; i < dimenze; i++){
-		if (hranice[i][0] < this->hranice[i][0]){
+		if (i >= this->dimenze){
 			this->hranice[i][0] = hranice[i][0];
+			this->hranice[i][1] = hranice[i][1];
+			this->dimenze++;
 			zmena = true;
 		}
-		if (hranice[i][1] > this->hranice[i][1]){
-			this->hranice[i][1] = hranice[i][1];
-			zmena = true;
+		else{
+			if (hranice[i][0] < this->hranice[i][0]){
+				this->hranice[i][0] = hranice[i][0];
+				zmena = true;
+			}
+			if (hranice[i][1] > this->hranice[i][1]){
+				this->hranice[i][1] = hranice[i][1];
+				zmena = true;
+			}
 		}
 	}
 	return zmena;
@@ -343,16 +365,16 @@ int Rstrom::VypoctiHranice(int puvodni[][2], int dim_puvodni, int nova[][2], int
 	//upravim jen hodnoty dimenzi u kterych to jde
 	int min_dimenze = Min(dim_puvodni, dim_nova);
 	for (int i = 0; i < min_dimenze; i++){
-		if (puvodni[i][0] < nova[i][0]){
+		if (puvodni[i][0] > nova[i][0]){
 			puvodni[i][0] = nova[i][0];
 		}
-		if (puvodni[i][1] > nova[i][1]){
+		if (puvodni[i][1] < nova[i][1]){
 			puvodni[i][1] = nova[i][1];
 		}
 	}
 	//pokud je dimenze rozsirujiciho prvku vetsi nez dimenze puvodni pak se puvodni rozsiri
 	if (dim_puvodni < dim_nova){
-		for (int i = 0; i < dim_nova; i++){
+		for (int i = dim_puvodni; i < dim_nova; i++){
 			puvodni[i][0] = nova[i][0];
 		}
 		return dim_nova;
@@ -360,66 +382,74 @@ int Rstrom::VypoctiHranice(int puvodni[][2], int dim_puvodni, int nova[][2], int
 	return dim_puvodni;
 }
 
-//hranice kdy do 2-rozmerneho pole vkladam obycejne pole slozene z "dom_nova" souradnic
+//hranice kdy do 2-rozmerneho pole vkladam obycejne pole slozene z "dim_nova" souradnic
 int Rstrom::VypoctiHranice(int puvodni[][2], int dim_puvodni, int nova[], int dim_nova){
 	//upravim jen hodnoty dimenzi u kterych to jde
 	int min_dimenze = Min(dim_puvodni, dim_nova);
 	for (int i = 0; i < min_dimenze; i++){
-		if (puvodni[i][0] < nova[i]){
+		if (puvodni[i][0] > nova[i]){
 			puvodni[i][0] = nova[i];
 		}
-		if (puvodni[i][1] > nova[i]){
+		if (puvodni[i][1] < nova[i]){
 			puvodni[i][1] = nova[i];
 		}
 	}
 	//pokud je dimenze rozsirujiciho prvku vetsi nez dimenze puvodni pak se puvodni rozsiri
 	if (dim_puvodni < dim_nova){
-		for (int i = 0; i < dim_nova; i++){
+		for (int i = dim_puvodni; i < dim_nova; i++){
 			puvodni[i][0] = nova[i];
+			puvodni[i][1] = nova[i];
 		}
 		return dim_nova;
 	}
 	return dim_puvodni;
 }
 
-/* DOES IT WORK? */
 int Rstrom::VypoctiHraniceUzlu(int puvodni[][2], int dim_puvodni, Rstrom *strom){
 	return VypoctiHranice(puvodni, dim_puvodni, strom->hranice, strom->dimenze);
 }
 
-int Rstrom::DalsiPrvek(Rstrom *strom, bool prepocitatLevy, bool prepocitatPravy, int zmenal[], int zmenar[]){
+int Rstrom::DalsiPrvek(Rstrom *strom, bool prepocitatLevy, bool prepocitatPravy,  long long zmenal[],  long long zmenar[]){
 
 	//ulozeni hranic do promennych 
 	int l_hranice[D][2];
-	for (int i = 0; i < dimenze; i++){
-		l_hranice[i][0] = hranice[i][0];
-		l_hranice[i][1] = hranice[i][1];
-	}
-	for (int i = dimenze; i < D; i++){
-		l_hranice[i][0] = 0;
-		l_hranice[i][1] = 0;
-	}
-	int l_dim = dimenze;
+	int l_dim;
 
 	int r_hranice[D][2];
-	for (int i = 0; i < strom->dimenze; i++){
-		r_hranice[i][0] = strom->hranice[i][0];
-		r_hranice[i][1] = strom->hranice[i][1];
-	}
-	for (int i = strom->dimenze; i < D; i++){
-		r_hranice[i][0] = 0;
-		r_hranice[i][1] = 0;
-	}
-	int r_dim = dimenze;
+	int r_dim;
 
 	//je treba vypocitat jak moc zalezi do ktereho listu ktery zaznam umistim.
 	//ty, u kterych je rozdil nejvyssi, pak budu prirazovat do prislusnych listu nejdrive
-	int rozdily[K - 1];
+	 long long rozdily[K - 1];
 
 	//i < K-1 proto, protoze K-1 je prvni levy prvek a K je prvni pravy prvek
 	for (int i = 0; i < K - 1; i++){
 		//pokud je prvek jiz do nejakeho pole prirazen, ma x-ovou souradnici rovnu -1
 		if (zmenal[i] != -1){
+
+			//obnoveni hranic
+			l_hranice[D][2];
+			for (int j = 0; j < dimenze; j++){
+				l_hranice[j][0] = hranice[j][0];
+				l_hranice[j][1] = hranice[j][1];
+			}
+			for (int j = dimenze; j < D; j++){
+				l_hranice[j][0] = 0;
+				l_hranice[j][1] = 0;
+			}
+			l_dim = dimenze;
+
+			r_hranice[D][2];
+			for (int j = 0; j < strom->dimenze; j++){
+				r_hranice[j][0] = strom->hranice[j][0];
+				r_hranice[j][1] = strom->hranice[j][1];
+			}
+			for (int j = strom->dimenze; j < D; j++){
+				r_hranice[j][0] = 0;
+				r_hranice[j][1] = 0;
+			}
+			r_dim = strom->dimenze;
+
 			//kdyz bych posunul vlevo
 			if (prepocitatLevy){
 				l_dim = dimenze;
@@ -456,7 +486,7 @@ int Rstrom::DalsiPrvek(Rstrom *strom, bool prepocitatLevy, bool prepocitatPravy,
 		}
 	} //konec for (int i = 0; i < K-1; i++)
 
-	int max = rozdily[0];
+	long long max = rozdily[0];
 	int maxIndex = 0;
 	for (int i = 1; i < K - 1; i++){
 		if (rozdily[i] > max){
@@ -508,10 +538,10 @@ void Rstrom::RozdelList(Rzaznam *zaznam){
 	Rstrom *novyList = new Rstrom(PomocnyPole[pravy]);
 
 	//zjistim na kterou stranu budou jednotlive zaznamy lepe pasovat
-	int zmenal[K - 1];
+	 long long zmenal[K - 1];
 	int pocetl = 1;
 	bool prepocitatLevy = true;
-	int zmenar[K - 1];
+	 long long zmenar[K - 1];
 	int pocetr = 1;
 	bool prepocitatPravy = true;
 	int maxIndex = 0;
@@ -592,8 +622,8 @@ void Rstrom::RozdelList(Rzaznam *zaznam){
 	}
 }
 
-int Rstrom::VypocitejObsah(int hranice[][2], int dimenze){
-	int obsah = 0;
+ long long Rstrom::VypocitejObsah(int hranice[][2], int dimenze){
+	 long long obsah = 0;
 	int strana = 0;
 	for (int i = 0; i < dimenze; i++){
 		strana = hranice[i][1] - hranice[i][0];
@@ -627,34 +657,57 @@ void Rstrom::VyberDvaZaznamy(int &l, int &r){
 		for (int k = PomocnyPole[i]->dimenze; k < D; k++){
 			pom_souradnice[k][0] = 0;
 		}
-		for (int j = 0; j < K+1; j++){
-			for (int k = 0; k < PomocnyPole[j]->dimenze; k++){
-				//zde porusuji svoji konvenci ze 0 je mensi souradnice a 1 vetsi, ale je to zde vporadku.
-				//Pro vypocet obsahu se bere rozdil, jednotlive rozdily (jeden pro 1 dimenzi) se 
-				//spolu nasobi a vysledek se vrati v absolutni hodnote
-				pom_souradnice[k][1] = PomocnyPole[j]->souradnice[k];
-			}
-			for (int k = PomocnyPole[j]->dimenze; k < D; k++){
-				pom_souradnice[k][1] = 0;
-			}
-			//Min vybira minimalni dimenzi - beru v potaz jen spolecny dimenze
-			obsah = VypocitejObsah(pom_souradnice, Min(PomocnyPole[i]->dimenze, PomocnyPole[j]->dimenze));
-			if (obsah > nejvetsiObsah){
-				nejvetsiObsah = obsah;
-				l = i;
-				r = j;
+		for (int j = 0; j < K+1; j++){ //-----------------------------------------------------------------------------------min porovnani
+			if (i != j){
+				for (int k = 0; k < PomocnyPole[j]->dimenze; k++){
+					//zde porusuji svoji konvenci ze 0 je mensi souradnice a 1 vetsi, ale je to zde vporadku.
+					//Pro vypocet obsahu se bere rozdil, jednotlive rozdily (jeden pro 1 dimenzi) se 
+					//spolu nasobi a vysledek se vrati v absolutni hodnote
+					pom_souradnice[k][1] = PomocnyPole[j]->souradnice[k];
+				}
+				for (int k = PomocnyPole[j]->dimenze; k < D; k++){
+					pom_souradnice[k][1] = 0;
+				}
+				//Min vybira minimalni dimenzi - beru v potaz jen spolecny dimenze
+				obsah = VypocitejObsah(pom_souradnice, Max(PomocnyPole[i]->dimenze, PomocnyPole[j]->dimenze));
+				if (obsah > nejvetsiObsah){
+					nejvetsiObsah = obsah;
+					l = i;
+					r = j;
+				}
 			}
 		}
 	}
 }
 
 void Rstrom::VyberDvaUzly(int &l, int &r){
+	int pom_souradnice[D][2];
 	int nejvetsiObsah = 0;
 	int obsah = 0;
 	for (int i = 0; i < K + 1; i++){
+		//PomocnyPole obsahuje veskere Potomky + prave vkladany uzel
+		for (int k = 0; k < PomocnyPoleUzlu[i]->dimenze; k++){
+			pom_souradnice[k][0] = PomocnyPoleUzlu[i]->hranice[k][0];
+			pom_souradnice[k][1] = PomocnyPoleUzlu[i]->hranice[k][1];
+		}
+		for (int k = PomocnyPole[i]->dimenze; k < D; k++){
+			pom_souradnice[k][0] = 0;
+			pom_souradnice[k][1] = 0;
+		}
 		for (int j = 0; j < K + 1; j++){
-			//PomocnyPole obsahuje veskere Potomky + prave vkladany uzel
-			obsah = VypocitejObsah(PomocnyPoleUzlu[i]->hranice, PomocnyPoleUzlu[i]->dimenze);
+			for (int k = 0; k < PomocnyPoleUzlu[j]->dimenze; k++){
+				if (PomocnyPoleUzlu[j]->hranice[k][0] < pom_souradnice[k][0]){
+					pom_souradnice[k][0] = PomocnyPoleUzlu[j]->hranice[k][0];
+				}
+				if (PomocnyPoleUzlu[j]->hranice[k][1] > pom_souradnice[k][1]){
+					pom_souradnice[k][1] = PomocnyPoleUzlu[j]->hranice[k][1];
+				}
+				for (int k = Max(PomocnyPole[i]->dimenze, PomocnyPole[j]->dimenze); k < D; k++){
+					pom_souradnice[k][0] = 0;
+					pom_souradnice[k][1] = 0;
+				}
+			}
+			obsah = VypocitejObsah(pom_souradnice, Min(PomocnyPole[i]->dimenze, PomocnyPole[j]->dimenze));
 			if (obsah > nejvetsiObsah){
 				nejvetsiObsah = obsah;
 				l = i;
@@ -701,10 +754,10 @@ void Rstrom::RozdelUzel(Rstrom *podstrom){
 	Rstrom *novyUzel = new Rstrom(PomocnyPoleUzlu[pravy]);
 
 	//zjistim na kterou stranu budou jednotlive zaznamy lepe pasovat
-	int zmenal[K - 1];
+	long long zmenal[K - 1];
 	int pocetl = 1;
 	bool prepocitatLevy = true;
-	int zmenar[K - 1];
+	long long zmenar[K - 1];
 	int pocetr = 1;
 	bool prepocitatPravy = true;
 
@@ -786,45 +839,60 @@ void Rstrom::RozdelUzel(Rstrom *podstrom){
 }
 
 bool Rstrom::Vyhledej(char *souradnice){
+	if (souradnice[0] == '\n'){
+		return false;
+	}
 	Rzaznam *z = new Rzaznam(souradnice);
-	/*if (Vyhledej(z)){
-		printf("Nalezeno %s\n", z->text);
+	if (Koren->Vyhledej(z)){
+		printf("Nalezeno %d...\n", z->souradnice[0]);
 		return true;
 	}
 	else{
-		printf("NENalezeno %s\n", z->text);
+		printf("-NENalezeno %d\n", z->souradnice[0]);
 		return false;
 	}
-	*/
-	return Koren->Vyhledej(z);
 }
 
 bool Rstrom::Vyhledej(Rzaznam *z){
 	if (JeStromList()){
 		for (int i = 0; i < pocetZaznamu; i++){
-			for (int j = 0; j < Min(Zaznamy[i]->dimenze, z->dimenze); j++){
-				if (Zaznamy[i]->souradnice[j] != z->souradnice[j]){
-					break;
+			if (Zaznamy[i]->dimenze == z->dimenze){
+				bool stejny = true;
+				for (int j = 0; j < Zaznamy[i]->dimenze; j++){
+					if (Zaznamy[i]->souradnice[j] != z->souradnice[j]){
+						stejny = false;
+					}
+				}
+				if (stejny){
+					return true;
 				}
 			}
-			return true;
 		}
-		printf("NENalezeno\n");
 		return false;
 	}
 	else{
 		bool result = false;
+		bool hranice = true;
 		for (int i = 0; i < pocetZaznamu; i++){
 			//pokud je hledany zaznam uvnitr obdelniku tohoto podstromu, volam v danem podstromu metodu Vyhledej
-			for (int j = 0; j < Min(Potomci[i]->dimenze, z->dimenze); j++){
-				if (Potomci[i]->hranice[j][0] > z->souradnice[j] || Potomci[i]->hranice[j][1] < z->souradnice[j]){
-					//hledany zaznam neni uvnitr obdelniku Potomci[i]
-					break;
+			if (Potomci[i]->dimenze >= z->dimenze){
+				for (int j = 0; j < z->dimenze; j++){
+					if (Potomci[i]->hranice[j][0] > z->souradnice[j] || Potomci[i]->hranice[j][1] < z->souradnice[j]){
+						//hledany zaznam neni uvnitr obdelniku Potomci[i]
+						hranice = false;
+						break;
+					}
 				}
+				if (hranice){
+					result = result || Potomci[i]->Vyhledej(z);
+					if (result){
+						return result;
+					}
+				}
+				hranice = true;
 			}
-			result = result || Potomci[i]->Vyhledej(z);
 		}
-		return result;
+		return false;
 	}
 }
 
@@ -846,7 +914,8 @@ void Rstrom::VypisPolozky(){
 	}
 	else{
 		for (int i = 0; i < pocetZaznamu; i++){
-			printf("zaznam: %d, dimenze: (%d) -> ", i, Zaznamy[i]->dimenze);
+			PocetPolozek++;
+			printf("zaznam: %d, dimenze: (%d), mbr: (%llu) -> ", i, Zaznamy[i]->dimenze, mbr);
 			for (int j = 0; j < Zaznamy[i]->dimenze - 1; j++){
 				printf("%d, ", Zaznamy[i]->souradnice[j]);
 			}
@@ -861,6 +930,7 @@ void Rstrom::VypisPolozky(){
 
 void Rstrom::Vypis(){
 	Koren->VypisPolozky();
+	printf("Pocet zaznamu: %d\n", PocetPolozek);
 }
 
 void Rstrom::UkazStrom(){
@@ -875,9 +945,15 @@ void Rstrom::VypisZaznamySPotomky(int hloubka){
 			printf("  ");
 		}
 		printf("%d) (node), ", hloubka);
-		printf("dimenze: ", dimenze);
+		printf("dimenze: \n ", dimenze);
 		for (int j = 0; j < dimenze - 1; j++){
+			for (int i = 0; i < hloubka; i++){
+				printf("  ");
+			}
 			printf("%d: %d - %d,\n ", j, hranice[j][0], hranice[j][1]);
+		}
+		for (int i = 0; i < hloubka; i++){
+			printf("  ");
 		}
 		printf("%d: %d - %d\n", dimenze - 1, hranice[dimenze - 1][0], hranice[dimenze - 1][1]);
 
@@ -891,14 +967,20 @@ void Rstrom::VypisZaznamySPotomky(int hloubka){
 		for (int i = 0; i < hloubka; i++){
 			printf("  ");
 		}
-		printf("%d) (leaf) ", hloubka);
+		printf("%d) (leaf) (mbr: %llu)\n", hloubka, mbr);
 		for (int j = 0; j < dimenze - 1; j++){
-			printf("%d: %d - %d ", j, hranice[j][0], hranice[j][1]);
+			for (int i = 0; i < hloubka; i++){
+				printf("  ");
+			}
+			printf("%d: %d - %d \n", j, hranice[j][0], hranice[j][1]);
+		}
+		for (int i = 0; i < hloubka; i++){
+			printf("  ");
 		}
 		printf("%d: %d - %d\n", dimenze - 1, hranice[dimenze - 1][0], hranice[dimenze - 1][1]);
 
 		for (int i = 0; i < pocetZaznamu; i++){
-			for (int i = 0; i < hloubka; i++){
+			for (int i = 0; i < hloubka+1; i++){
 				printf("  ");
 			}
 			printf("zaznam: %d, dimenze: (%d) -> ", i, Zaznamy[i]->dimenze);

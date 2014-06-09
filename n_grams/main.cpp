@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 //#include "Bstrom.h"
 #include "Rstrom.h"
@@ -65,6 +66,8 @@ int main(){
 	Strom.Vyhledej("1000");
 */
 
+
+
 	//--------------------Rstrom--------------------
 	//delkarace promennych
 	int souradnice[] = {0, 0, 0, 0, 0};
@@ -72,20 +75,38 @@ int main(){
 	int y = 0;
 	Rstrom Strom;
 
+	
 	int a = scanf("%d", &souradnice[0]);
 	int b = scanf("%d", &souradnice[1]);
-	printf("ukladam do stromu: %d, %d\n", souradnice[0], souradnice[1]);
+	//printf("ukladam do stromu: %d, %d\n", souradnice[0], souradnice[1]);
 	Strom.VlozPrvniZaznam(souradnice, 2);
-
+	int PocetPolozek = 1;
 	fgets(string, sizeof(string)-1, stdin);
 	while (fgets(string, sizeof(string)-1, stdin)){
 		strtok(string, "\n");
-		printf("ukladam do stromu: %s\n", string);
+		//printf("ukladam do stromu: %s\n", string);
 		Strom.VlozZaznam(string);
+		PocetPolozek++;
+		//Strom.UkazStrom();
 	}
-
-	Strom.Vypis();
 	Strom.UkazStrom();
+	Strom.Vypis();
+	printf("Pocet vlozenych zaznamu: %d\n", PocetPolozek);
+
+	/*
+	char str[4];
+	for (int i = 0; i < 1000; i++){
+		sprintf(str, "%d", i);
+		if (!Strom.Vyhledej(str)){
+			printf("nenalezeno: %d\n", i);
+		}
+	}
+	*/
+	printf("Vyhledej: ");
+	while (fgets(string, sizeof(string)-1, stdin)){
+		strtok(string, "\n");
+		Strom.Vyhledej(string);
+	}
 
 	return 0;
 }
