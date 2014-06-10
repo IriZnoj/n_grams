@@ -45,8 +45,7 @@ void Rzaznam::RetezecNaCisla(char *retezec){
 
 Rstrom::Rstrom(){
 	Koren = this;
-	//po vytvoreni stromu timto zpusobem je vzdy volana
-	//metoda VlozPrvniZaznam(int x, int y); az tehdy se cely strom inicializuje
+	prvni = true;
 }
 
 Rstrom::Rstrom(Rzaznam *z){
@@ -113,16 +112,12 @@ void Rstrom::VytvoreniStromu(Rzaznam *z){
 		hranice[i][1] = z->souradnice[i];
 	}
 	this->mbr = 0;
-}
-
-void Rstrom::VlozPrvniZaznam(char *souradnice){
-	Rzaznam *z = new Rzaznam(souradnice);
-	VytvoreniStromu(z);
+	prvni = false;
 }
 
 void Rstrom::VlozPrvniZaznam(int souradnice[], int velikost){
 	Rzaznam *z = new Rzaznam(souradnice, velikost);
-	VytvoreniStromu(z);
+	
 }
 
 void Rstrom::VlozZaznam(Rzaznam *zaznam){
@@ -136,20 +131,39 @@ void Rstrom::VlozZaznam(Rzaznam *zaznam){
 }
 
 void Rstrom::VlozZaznam(char *souradnice){
+	//TO DO chybi kontrola stringu
+
 	Rzaznam *zaznam = new Rzaznam(souradnice);
-	if (zaznam->dimenze != 0){
-		if (Koren->Vyhledej(zaznam)){
-			//printf("duplicita\n");
-		}
-		else{
-			Koren->VlozZaznam(zaznam);
+	if (prvni){
+		VytvoreniStromu(zaznam);
+	}
+	else{
+		if (zaznam->dimenze != 0){
+			if (Koren->Vyhledej(zaznam)){
+				//printf("duplicita\n");
+			}
+			else{
+				Koren->VlozZaznam(zaznam);
+			}
 		}
 	}
 }
 
 void Rstrom::VlozZaznam(int souradnice[], int velikost){
 	Rzaznam *zaznam = new Rzaznam(souradnice, velikost);
-	Koren->VlozZaznam(zaznam);
+	if (prvni){
+		VytvoreniStromu(zaznam);
+	}
+	else{
+		if (zaznam->dimenze != 0){
+			if (Koren->Vyhledej(zaznam)){
+				//printf("duplicita\n");
+			}
+			else{
+				Koren->VlozZaznam(zaznam);
+			}
+		}
+	}
 }
 
 void Rstrom::VlozUzel(Rstrom *potomek){
@@ -844,11 +858,11 @@ bool Rstrom::Vyhledej(char *souradnice){
 	}
 	Rzaznam *z = new Rzaznam(souradnice);
 	if (Koren->Vyhledej(z)){
-		printf("Nalezeno %d...\n", z->souradnice[0]);
+		//printf("Nalezeno %d...\n", z->souradnice[0]);
 		return true;
 	}
 	else{
-		printf("-NENalezeno %d\n", z->souradnice[0]);
+		//printf("-NENalezeno %d\n", z->souradnice[0]);
 		return false;
 	}
 }
@@ -903,7 +917,7 @@ bool Rstrom::JeStromList(){
 	return false;
 }
 
-void Rstrom::VypisPolozky(){
+void Rstrom::VypisPolozkyPlus(){
 	if (this->Potomci[0] != NULL){
 		for (int i = 0; i < pocetZaznamu; i++){
 			//podminka pro nejpravejsi potomky...
@@ -928,8 +942,32 @@ void Rstrom::VypisPolozky(){
 	}
 }
 
+void Rstrom::VypisPolozky(){
+	if (this->Potomci[0] != NULL){
+		for (int i = 0; i < pocetZaznamu; i++){
+			//podminka pro nejpravejsi potomky...
+			if (this->Potomci[i] != NULL){
+				this->Potomci[i]->VypisPolozky();
+			}
+		}
+	}
+	else{
+		for (int i = 0; i < pocetZaznamu; i++){
+			PocetPolozek++;
+			for (int j = 0; j < Zaznamy[i]->dimenze - 1; j++){
+				printf("%d, ", Zaznamy[i]->souradnice[j]);
+			}
+			printf("%d\n", Zaznamy[i]->souradnice[Zaznamy[i]->dimenze - 1]);
+		}
+	}
+}
+
 void Rstrom::Vypis(){
 	Koren->VypisPolozky();
+}
+
+void Rstrom::VypisPlus(){
+	Koren->VypisPolozkyPlus();
 	printf("Pocet zaznamu: %d\n", PocetPolozek);
 }
 

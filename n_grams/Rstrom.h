@@ -19,6 +19,7 @@ static const int D = 5;
 class Rstrom;
 static Rstrom *Koren;
 static int PocetPolozek = 0;
+static bool prvni = false;
 
 class Rzaznam{
 
@@ -79,6 +80,7 @@ private:
 	bool Vyhledej(Rzaznam *zaznam);
 	bool JeStromList();
 	void VypisPolozky();
+	void VypisPolozkyPlus();
 	void VypisZaznamySPotomky(int hloubka);
 
 public:
@@ -89,9 +91,9 @@ public:
 	Rstrom(Rstrom *LPotomek, Rstrom *RPotomek);
 	void VlozZaznam(char *souradnice);
 	void VlozZaznam(int souradnice[], int velikost);
-	void VlozPrvniZaznam(char *souradnice);
 	void VlozPrvniZaznam(int souradnice[], int velikost);
 	bool Vyhledej(char *souradnice);
 	void Vypis();
+	void VypisPlus();
 	void UkazStrom();
 };

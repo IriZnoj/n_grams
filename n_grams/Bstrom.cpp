@@ -108,11 +108,6 @@ void Bstrom::VlozZaznamDoRodice(Bzaznam *zaznam, Bstrom *RPotomek){
 	}
 }
 
-void Bstrom::VlozPrvniZaznam(char *text){
-	Zaznamy[0] = new Bzaznam(text);
-	pocetZaznamu = 1;
-}
-
 void Bstrom::VlozDoPotomka(Bzaznam *zaznam){
 	int porovnani;
 	for (int i = 0; i < pocetZaznamu; i++){
@@ -369,37 +364,54 @@ void Bstrom::VypisPolozky(Bstrom *strom){
 	else{
 		for (int i = 0; i < strom->pocetZaznamu; i++){
 			printf("%s\n", strom->Zaznamy[i]->text);
+			PocetPolozek++;
 		}
 	}
 }
 
 void Bstrom::Vypis(){
 	VypisPolozky(Koren);
+	//printf("Pocet polozek: %d\n", PocetPolozek);
 }
 
 void Bstrom::UkazStrom(){
 	printf("Koren: \n");
-	Koren->VypisZaznamySPotomky();
-	if (Koren->Potomci[0] != NULL){
-		for (int i = 0; i < Koren->pocetZaznamu + 1; i++){
-			Koren->Potomci[i]->VypisZaznamySPotomky();
-		}
-	}
+	Koren->VypisZaznamySPotomky(0);
 }
 
-void Bstrom::VypisZaznamySPotomky(){
-	for (int i = 0; i < pocetZaznamu; i++){
-		printf("Cislo zaznamu: %d, zaznam: %s\n", i, Zaznamy[i]->text);
-		/*if (Zaznamy[i]->Soused != NULL){
-		printf(" - Soused: %s\n", Zaznamy[i]->Soused->text);
-		}*/
-	}
-	for (int i = 0; i < K + 1; i++){
-		if (Potomci[i] != NULL){
-			for (int j = 0; j < Potomci[i]->pocetZaznamu; j++){
-				printf("Potomek %d: %s\n", i, Potomci[i]->Zaznamy[j]->text);
+void Bstrom::VypisZaznamySPotomky(int hloubka){
+	if (Potomci[0] != NULL){
+		//na zacatku pocet mezer urcuje zanoreni
+		for (int i = 0; i < hloubka; i++){
+			printf("  ");
+		}
+		printf("%d. uroven (node), potomku: %d\n", hloubka, pocetZaznamu);
+		for (int i = 0; i < pocetZaznamu; i++){
+			for (int i = 0; i < hloubka; i++){
+				printf("  ");
+			}
+			printf("%d: zaznam: %s\n", i, Zaznamy[i]->text);
+			//podminka pro nejpravejsi potomky...
+			if (Potomci[i] != NULL){
+				Potomci[i]->VypisZaznamySPotomky(hloubka+1);
 			}
 		}
+		if (Potomci[pocetZaznamu] != NULL){
+			Potomci[pocetZaznamu]->VypisZaznamySPotomky(hloubka + 1);
+		}
 	}
-	printf("\n");
+	else{
+		for (int i = 0; i < hloubka; i++){
+			printf("  ");
+		}
+		printf("%d. uroven (list), potomku: %d\n", hloubka, pocetZaznamu);
+		for (int i = 0; i < pocetZaznamu; i++){
+			//na zacatku pocet mezer urcuje zanoreni
+			for (int i = 0; i < hloubka; i++){
+				printf("  ");
+			}
+			printf(" Potomek %d: %s\n", i, Zaznamy[i]->text);
+			PocetPolozek++;
+		}
+	}
 }

@@ -10,6 +10,7 @@ static const int MAX_SLOVO = 75;
 
 class Bstrom;
 static Bstrom *Koren;
+static int PocetPolozek = 0;
 
 class Bzaznam{
 
@@ -49,10 +50,9 @@ class Bstrom{
 		Bstrom(Bzaznam *z);
 		Bstrom(Bzaznam *z, Bstrom *LPotomek, Bstrom *RPotomek);
 		void VlozZaznam(char *text);
-		void VlozPrvniZaznam(char *text);
 		bool Vyhledej(char *text);
 		void VypisPolozky(Bstrom *strom);
 		void Vypis();
 		void UkazStrom();
-		void VypisZaznamySPotomky();
+		void VypisZaznamySPotomky(int hloubka);
 };

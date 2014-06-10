@@ -15,6 +15,21 @@
 /* Pouziti:
  *		./n_grams < vstupni_soubor
  *		./n_grams
+ *
+ *		pro pouziti Bstromu je treba odkomentovat radek s pripojenou knihovnou a sekci
+ *		oznacenou: //--------------------Bstrom--------------------
+ *
+ *		pro pouziti Rstromu je treba odkomentovat radek s pripojenou knihovnou a sekci
+ *		oznacenou: //--------------------Rstrom--------------------
+ *
+ *		v main:	void Vypis():
+ *								vypis vsech polozech ulozenych ve stromu	
+ *						void UkazStrom():						
+ *								vypis polozek tak jak jsou ulozeny ve stromu vcetne jeho struktury
+ *						void VlozZaznam(char vstup[]):
+ *								vlozeni zaznamu do stromu 
+ *						bool Vyhledej(char retezec[]):
+ *								vyhledani zaznamu ve stromu
  */
 
 
@@ -29,19 +44,12 @@
 using namespace std;
 
 int main(){
-	/* jednotlive zaznamy oddeleny bilym znakem
-	scanf("%s", vstup);
-	//printf("ukladam do stromu: %s\n", vstup);
-	Strom.VlozPrvniZaznam(vstup);
 
-	while (int a = scanf("%s", vstup) >= 0){
-		printf("ukladam do stromu: %s\n", vstup);
-		Strom.VlozZaznam(vstup);
-	}
-	*/
+	char string[255];
 
 	//--------------------Bstrom--------------------
-/*	char vstup[MAX_SLOVO];
+	/*
+	char vstup[MAX_SLOVO];
 	Bstrom Strom;
 	
 	//zaznamy oddeleny koncem radku
@@ -55,44 +63,49 @@ int main(){
 			znak = getchar();
 		}
 		vstup[pocet_pismen++] = '\0';
-		printf("ukladam do stromu: %s\n", vstup);
+		//printf("ukladam do stromu: %s\n", vstup);
 		Strom.VlozZaznam(vstup); 
 		znak = getchar();
 	}
 
 	Strom.Vypis();
 	Strom.UkazStrom();
-
-	Strom.Vyhledej("1000");
-*/
-
-
+	
+	*/
+	//--------------------Bstrom--------------------
 
 	//--------------------Rstrom--------------------
+	
 	//delkarace promennych
 	int souradnice[] = {0, 0, 0, 0, 0};
-	char string[255];
+	
 	int y = 0;
 	Rstrom Strom;
 
-	
-	int a = scanf("%d", &souradnice[0]);
-	int b = scanf("%d", &souradnice[1]);
+	//jina moznost jak ukladat zaznamy do Rstromu
+	//int a = scanf("%d", &souradnice[0]);
+	//int b = scanf("%d", &souradnice[1]);
 	//printf("ukladam do stromu: %d, %d\n", souradnice[0], souradnice[1]);
-	Strom.VlozPrvniZaznam(souradnice, 2);
-	int PocetPolozek = 1;
-	fgets(string, sizeof(string)-1, stdin);
+	//Strom.VlozZaznam(souradnice, 2);
+	
+	//int PocetPolozek = 0;
+	//fgets(string, sizeof(string)-1, stdin);
 	while (fgets(string, sizeof(string)-1, stdin)){
 		strtok(string, "\n");
 		//printf("ukladam do stromu: %s\n", string);
 		Strom.VlozZaznam(string);
-		PocetPolozek++;
+		//PocetPolozek++;
 		//Strom.UkazStrom();
 	}
-	Strom.UkazStrom();
-	Strom.Vypis();
-	printf("Pocet vlozenych zaznamu: %d\n", PocetPolozek);
 
+	Strom.Vypis();
+
+	//Strom.UkazStrom();
+	//Strom.VypisPlus();
+	//printf("Pocet vlozenych zaznamu: %d\n", PocetPolozek);
+
+	//--------------------Rstrom--------------------
+	
 	/*
 	char str[4];
 	for (int i = 0; i < 1000; i++){
@@ -102,11 +115,18 @@ int main(){
 		}
 	}
 	*/
+
 	printf("Vyhledej: ");
 	while (fgets(string, sizeof(string)-1, stdin)){
 		strtok(string, "\n");
-		Strom.Vyhledej(string);
+		if (Strom.Vyhledej(string)){
+			printf("Nalezeno\n");
+		}
+		else{
+			printf("-NENalezeno\n");
+		}
 	}
 
+	
 	return 0;
 }
