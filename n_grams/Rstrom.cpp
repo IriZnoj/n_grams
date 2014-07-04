@@ -922,7 +922,7 @@ void Rstrom::VypisPolozkyPlus(){
 		for (int i = 0; i < pocetZaznamu; i++){
 			//podminka pro nejpravejsi potomky...
 			if (this->Potomci[i] != NULL){
-				this->Potomci[i]->VypisPolozky();
+				this->Potomci[i]->VypisPolozkyPlus();
 			}
 		}
 	}
