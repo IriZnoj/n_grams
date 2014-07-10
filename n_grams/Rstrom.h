@@ -1,5 +1,7 @@
 #pragma once
 
+#define DUPLICITY
+
 //vychazim z mnou napsaneho Bstromu
 
 //jako klic budu pouzivat int

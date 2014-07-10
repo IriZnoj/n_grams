@@ -140,7 +140,9 @@ void Rstrom::VlozZaznam(char *souradnice){
 	else{
 		if (zaznam->dimenze != 0){
 			if (Koren->Vyhledej(zaznam)){
-				//printf("duplicita\n");
+#ifndef DUPLICITY
+				Koren->VlozZaznam(zaznam);
+#endif
 			}
 			else{
 				Koren->VlozZaznam(zaznam);
@@ -157,7 +159,9 @@ void Rstrom::VlozZaznam(int souradnice[], int velikost){
 	else{
 		if (zaznam->dimenze != 0){
 			if (Koren->Vyhledej(zaznam)){
-				//printf("duplicita\n");
+#ifndef DUPLICITY
+				Koren->VlozZaznam(zaznam);
+#endif
 			}
 			else{
 				Koren->VlozZaznam(zaznam);
@@ -953,7 +957,7 @@ void Rstrom::VypisPolozky(){
 	}
 	else{
 		for (int i = 0; i < pocetZaznamu; i++){
-			PocetPolozek++;
+			//PocetPolozek++;
 			for (int j = 0; j < Zaznamy[i]->dimenze - 1; j++){
 				printf("%d, ", Zaznamy[i]->souradnice[j]);
 			}

@@ -140,10 +140,12 @@ void Bstrom::VlozDoListu(Bzaznam *zaznam){
 			VlozVlevo(zaznam, i);
 			return;
 		}
-		else if (porovnani == 0){
+#ifdef DUPLICITY
+		if (porovnani == 0){
 			//zaznam zde jiz existuje, lze dodat informace do zaznamu
 			return;
 		}
+#endif
 	}
 	//jde vpravo
 	VlozVpravo(zaznam);
@@ -239,7 +241,9 @@ void Bstrom::RozdelList(Bzaznam *zaznam){
 		VlozZaznam(zaznam);
 	}
 	else{
-		//if(porovnani == 0) zaznam zde jiz existuje, lze dodat informace do zaznamu
+#ifdef DUPLICITY
+		if(porovnani == 0) //zaznam zde jiz existuje, lze dodat informace do zaznamu
+#endif
 		//jde vpravo
 		novyList->VlozZaznam(zaznam);
 	}

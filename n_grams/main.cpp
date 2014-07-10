@@ -70,8 +70,8 @@ int main(){
 
 	Strom.Vypis();
 	Strom.UkazStrom();
-	
 	*/
+	
 	//--------------------Bstrom--------------------
 
 	//--------------------Rstrom--------------------
@@ -100,10 +100,10 @@ int main(){
 
 	Strom.Vypis();
 
-	//Strom.UkazStrom();
-	//Strom.VypisPlus();
+	Strom.UkazStrom();
+	Strom.VypisPlus();
 	//printf("Pocet vlozenych zaznamu: %d\n", PocetPolozek);
-
+	
 	//--------------------Rstrom--------------------
 	
 	/*

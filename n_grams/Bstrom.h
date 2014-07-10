@@ -1,5 +1,7 @@
 #pragma once
 
+#define DUPLICITY
+
 //jako klic budu pouzivat int
 static const int MAX_INT = 2147483647;
 //K udava pocet zaznamu ve strankach/uzlech/podstromech
