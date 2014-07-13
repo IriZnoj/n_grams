@@ -63,6 +63,11 @@ void Bstrom::VlozZaznam(Bzaznam *zaznam){
 }
 
 void Bstrom::VlozZaznam(char *text){
+	//prazdny zaznam nebude ulozen. Podminka je pro pripad nacitani ze souboru
+	//zpusobem jakym soubor nacitam - tedy s pravy rb
+	if (text[0] == NULL){
+		return;
+	}
 	Bzaznam *zaznam = new Bzaznam(text);
 	if (Koren->Potomci[0] != NULL){
 		//nejsem v listu
@@ -82,6 +87,11 @@ void Bstrom::VlozZaznamDoRodice(Bzaznam *zaznam, Bstrom *RPotomek){
 	}
 	for (int i = 0; i < pocetZaznamu; i++){
 		porovnani = JePrvniVetsi(Zaznamy[i], zaznam);
+#ifdef DUPLICITY
+		if(porovnani == 0){
+			porovnani = 1;
+		}
+#endif
 		if (porovnani == 1){
 			//jde vlevo a na i-ty index ulozi tento prvek
 			VlozVlevo(zaznam, i);
@@ -91,10 +101,7 @@ void Bstrom::VlozZaznamDoRodice(Bzaznam *zaznam, Bstrom *RPotomek){
 			RPotomek->Rodic = this;
 			return;
 		}
-		else if (porovnani == 0){
-			//zaznam zde jiz existuje, lze dodat informace do zaznamu
-			return;
-		}
+
 	}
 	//jde vpravo
 	VlozVpravo(zaznam);
@@ -118,7 +125,11 @@ void Bstrom::VlozDoPotomka(Bzaznam *zaznam){
 			return;
 		}
 		else if (porovnani == 0){
+#ifdef DUPLICITY
 			//zaznam zde jiz existuje, lze dodat informace do zaznamu
+			//printf("Duplicita %s\n", zaznam->text);
+			Potomci[i]->VlozZaznam(zaznam);
+#endif
 			return;
 		}
 	}
@@ -127,6 +138,7 @@ void Bstrom::VlozDoPotomka(Bzaznam *zaznam){
 }
 
 void Bstrom::VlozDoListu(Bzaznam *zaznam){
+	//printf("%s\n", zaznam->text);
 	int porovnani;
 	if (pocetZaznamu == K){
 		//je potreba list rozdelit na dva
@@ -140,15 +152,27 @@ void Bstrom::VlozDoListu(Bzaznam *zaznam){
 			VlozVlevo(zaznam, i);
 			return;
 		}
+		else if (porovnani == 0){
 #ifdef DUPLICITY
-		if (porovnani == 0){
 			//zaznam zde jiz existuje, lze dodat informace do zaznamu
+			//printf("Duplicita %s\n", zaznam->text);
+			VlozVlevo(zaznam, i);
+#endif
 			return;
 		}
-#endif
 	}
-	//jde vpravo
-	VlozVpravo(zaznam);
+	if (pocetZaznamu > 0 && JePrvniVetsi(Zaznamy[pocetZaznamu-1], zaznam) == 0){
+#ifdef DUPLICITY
+		//zaznam zde jiz existuje, lze dodat informace do zaznamu
+		//printf("Duplicita %s\n", zaznam->text);
+		VlozVlevo(zaznam, pocetZaznamu - 1);
+#endif
+		return;
+	}
+	else{
+		//jde vpravo
+		VlozVpravo(zaznam);
+	}
 }
 /*
 return -1 prvni je mensi
@@ -201,6 +225,13 @@ void Bstrom::RozdelList(Bzaznam *zaznam){
 	int porovnani;
 	for (int i = 0; i < pocetZaznamu; i++){
 		porovnani = JePrvniVetsi(Zaznamy[i], zaznam);
+#ifdef DUPLICITY
+		if (porovnani == 0){
+			//zaznam zde jiz existuje, lze dodat informace do zaznamu
+			//novy stejny zaznam se oznaci jako mensi
+			porovnani = 1;
+		}
+#endif
 		if (porovnani == 0){
 			//zaznam zde jiz existuje, lze dodat informace do zaznamu
 			return;
@@ -236,14 +267,11 @@ void Bstrom::RozdelList(Bzaznam *zaznam){
 
 	//zjistim do ktere stranky bude patrit nove vkladany prvek
 	porovnani = JePrvniVetsi(zaznam, Zaznamy[stredniIndex]);
-	if (porovnani == -1){
+	if (porovnani == -1 || porovnani == 0){
 		//jde vlevo
 		VlozZaznam(zaznam);
 	}
 	else{
-#ifdef DUPLICITY
-		if(porovnani == 0) //zaznam zde jiz existuje, lze dodat informace do zaznamu
-#endif
 		//jde vpravo
 		novyList->VlozZaznam(zaznam);
 	}
@@ -294,7 +322,7 @@ void Bstrom::RozdelUzel(Bzaznam *zaznam, Bstrom *RPotomek){
 
 	//zjistim do ktere stranky bude patrit nove vkladany uzel
 	int porovnani = JePrvniVetsi(zaznam, Zaznamy[stredniIndex]);
-	if (porovnani == -1){
+	if (porovnani == -1 || porovnani == 0){
 		//jde vlevo
 		VlozZaznamDoRodice(zaznam, RPotomek);
 	}

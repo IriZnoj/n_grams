@@ -38,44 +38,60 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <errno.h>
+#include <time.h>       /* clock_t, clock, CLOCKS_PER_SEC */
 
-//#include "Bstrom.h"
-#include "Rstrom.h"
+#include "Bstrom.h"
+//#include "Rstrom.h"
 using namespace std;
 
-int main(){
+int main(int argc, char *argv[]){
 
 	char string[255];
+	clock_t t;
+	FILE *soubor;
+	if (argc == 2){
+		if ((soubor = fopen(argv[1], "rb")) == NULL){
+			fprintf(stderr, "Chyba cteni souboru %s\n", argv[1]);
+			return errno;
+		}
+	}
+	else{
+		soubor = stdin;
+	}
+
 
 	//--------------------Bstrom--------------------
-	/*
+	
 	char vstup[MAX_SLOVO];
 	Bstrom Strom;
 	
 	//zaznamy oddeleny koncem radku
-	int znak = getchar();
+	int znak = fgetc(soubor);
 	int pocet_pismen;
+	t = clock();
 	while (znak != EOF){
 		pocet_pismen = 0;
-
-		while (znak != '\n' && znak != EOF){
+		while (znak != '\r' && znak != '\n' && znak != EOF){
 			vstup[pocet_pismen++] = znak;
-			znak = getchar();
+			znak = fgetc(soubor);
+			//printf(" - %c - \n", znak);
 		}
 		vstup[pocet_pismen++] = '\0';
 		//printf("ukladam do stromu: %s\n", vstup);
+		//printf("'%s'\n", vstup);
 		Strom.VlozZaznam(vstup); 
-		znak = getchar();
+		znak = fgetc(soubor);
 	}
-
+	t = clock() - t;
 	Strom.Vypis();
-	Strom.UkazStrom();
-	*/
+	//Strom.UkazStrom();
+	printf("%d tiku (%f vterin).\n", t, ((float)t) / CLOCKS_PER_SEC);
 	
 	//--------------------Bstrom--------------------
 
 	//--------------------Rstrom--------------------
-	
+	/*
 	//delkarace promennych
 	int souradnice[] = {0, 0, 0, 0, 0};
 	
@@ -101,7 +117,7 @@ int main(){
 	Strom.Vypis();
 
 	Strom.UkazStrom();
-	Strom.VypisPlus();
+	//Strom.VypisPlus();
 	//printf("Pocet vlozenych zaznamu: %d\n", PocetPolozek);
 	
 	//--------------------Rstrom--------------------
@@ -115,16 +131,18 @@ int main(){
 		}
 	}
 	*/
-
 	printf("Vyhledej: ");
 	while (fgets(string, sizeof(string)-1, stdin)){
 		strtok(string, "\n");
+		t = clock();
 		if (Strom.Vyhledej(string)){
-			printf("Nalezeno\n");
+			printf("Nalezeno");
 		}
 		else{
-			printf("-NENalezeno\n");
+			printf("-NENalezeno");
 		}
+		t = clock() - t;
+		printf(" s casem: %d tiku (%f vterin).\n", t, ((float)t) / CLOCKS_PER_SEC);
 	}
 
 	

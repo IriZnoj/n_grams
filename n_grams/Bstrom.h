@@ -1,6 +1,6 @@
 #pragma once
 
-#define DUPLICITY
+//#define DUPLICITY
 
 //jako klic budu pouzivat int
 static const int MAX_INT = 2147483647;
