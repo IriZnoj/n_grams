@@ -6,7 +6,9 @@
 //mbr = obsah, objem, nebo neco takovyho pro vice-dimenzionalni hranice
 //zjisteni velikosti --> velikost = sizeof(souradnice) / sizeof(souradnice[0])
 Rzaznam::Rzaznam(int souradnice[], int velikost){
-	this->mbr = NULL;
+	if (velikost > D){
+		velikost = D;
+	}
 	this->dimenze = velikost;
 	for (int i = 0; i < velikost; i++){
 		this->souradnice[i] = souradnice[i];
@@ -15,7 +17,6 @@ Rzaznam::Rzaznam(int souradnice[], int velikost){
 }
 
 Rzaznam::Rzaznam(char * retezec){
-	this->mbr = NULL;
 	//dimenze bude nastavena pri prevodu
 	this->dimenze = 0;
 	if (retezec[0] == '\n'){
@@ -871,6 +872,18 @@ bool Rstrom::Vyhledej(char *souradnice){
 	}
 }
 
+bool Rstrom::Vyhledej(int souradnice[], int velikost){
+	Rzaznam *z = new Rzaznam(souradnice, velikost);
+	if (Koren->Vyhledej(z)){
+		//printf("Nalezeno %d...\n", z->souradnice[0]);
+		return true;
+	}
+	else{
+		//printf("-NENalezeno %d\n", z->souradnice[0]);
+		return false;
+	}
+}
+
 bool Rstrom::Vyhledej(Rzaznam *z){
 	if (JeStromList()){
 		for (int i = 0; i < pocetZaznamu; i++){
@@ -966,8 +979,46 @@ void Rstrom::VypisPolozky(){
 	}
 }
 
+void Rstrom::VelikostPolozek(){
+	//printf("Vel: %d -> ", Vel); 
+	Vel += sizeof(dimenze);
+	Vel += sizeof(hranice);
+	Vel += sizeof(mbr);
+	Vel += sizeof(pocetZaznamu);
+	Vel += sizeof(Rodic);
+	Vel += sizeof(Potomci[0]) * K;
+	Vel += sizeof(Zaznamy[0]) * K;
+	//printf("Vel: %d\n", Vel);
+	if (this->Potomci[0] != NULL){
+		for (int i = 0; i < pocetZaznamu; i++){
+			//podminka pro nejpravejsi potomky...
+			if (this->Potomci[i] != NULL){
+				this->Potomci[i]->VelikostPolozek();
+			}
+		}
+	}
+	else{
+		//printf("Vel: %d -> ", Vel);
+		for (int i = 0; i < pocetZaznamu; i++){
+			//PocetPolozek++;
+			for (int j = 0; j < Zaznamy[i]->dimenze; j++){
+				Vel += sizeof(Zaznamy[i]->souradnice[j]);
+				Vel += sizeof(dimenze);
+			}
+		}
+		//printf("Vel: %d\n", Vel);
+	}
+}
+
 void Rstrom::Vypis(){
 	Koren->VypisPolozky();
+}
+
+void Rstrom::VypisVelikost(){
+	Koren->VelikostPolozek();
+	Vel += sizeof(Koren);
+	Vel /= 1000;
+	printf("Velikost: %LLd kb\n", Vel);
 }
 
 void Rstrom::VypisPlus(){

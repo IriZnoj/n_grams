@@ -10,6 +10,7 @@ static const int K = 4;
 //maximalni velikost zaznamu
 static const int MAX_SLOVO = 75;
 
+static long long Vel = 0;
 class Bstrom;
 static Bstrom *Koren;
 static int PocetPolozek = 0;
@@ -44,6 +45,8 @@ class Bstrom{
 		void RozdelList(Bzaznam *zaznam);
 		void RozdelUzel(Bzaznam *zaznam, Bstrom *RPotomek);
 		bool Vyhledej(Bzaznam *zaznam);
+		void VypisPolozky(Bstrom *strom);
+		void VelikostPolozek(Bstrom *strom);
 		bool JeStromList();
 
 	public:
@@ -53,7 +56,7 @@ class Bstrom{
 		Bstrom(Bzaznam *z, Bstrom *LPotomek, Bstrom *RPotomek);
 		void VlozZaznam(char *text);
 		bool Vyhledej(char *text);
-		void VypisPolozky(Bstrom *strom);
+		void VypisVelikost();
 		void Vypis();
 		void UkazStrom();
 		void VypisZaznamySPotomky(int hloubka);

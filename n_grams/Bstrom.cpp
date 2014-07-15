@@ -385,6 +385,10 @@ bool Bstrom::JeStromList(){
 	return false;
 }
 void Bstrom::VypisPolozky(Bstrom *strom){
+	Vel += sizeof(strom->pocetZaznamu);
+	Vel += sizeof(strom->Rodic);
+	Vel += sizeof(strom->Potomci[0]) * K;
+	Vel += sizeof(strom->Zaznamy[0]) * K + 1;
 	if (strom->Potomci[0] != NULL){
 		for (int i = 0; i < strom->pocetZaznamu + 1; i++){
 			//podminka pro nejpravejsi potomky...
@@ -396,7 +400,29 @@ void Bstrom::VypisPolozky(Bstrom *strom){
 	else{
 		for (int i = 0; i < strom->pocetZaznamu; i++){
 			printf("%s\n", strom->Zaznamy[i]->text);
-			PocetPolozek++;
+			//PocetPolozek++;
+		}
+	}
+}
+
+void Bstrom::VelikostPolozek(Bstrom *strom){
+	Vel += sizeof(strom->pocetZaznamu);
+	//printf("1: %d\n", sizeof(strom->pocetZaznamu));
+	Vel += sizeof(strom->Rodic);
+	//printf("2: %d\n", sizeof(strom->Rodic));
+	Vel += sizeof(strom->Potomci[0]) * K;
+	Vel += sizeof(strom->Zaznamy[0]) * K + 1;
+	if (strom->Potomci[0] != NULL){
+		for (int i = 0; i < strom->pocetZaznamu + 1; i++){
+			//podminka pro nejpravejsi potomky...
+			if (strom->Potomci[i] != NULL){
+				strom->Potomci[i]->VelikostPolozek(strom->Potomci[i]);
+			}
+		}
+	}
+	else{
+		for (int i = 0; i < strom->pocetZaznamu; i++){
+			Vel += sizeof(strom->Zaznamy[i]->text);
 		}
 	}
 }
@@ -404,6 +430,13 @@ void Bstrom::VypisPolozky(Bstrom *strom){
 void Bstrom::Vypis(){
 	VypisPolozky(Koren);
 	//printf("Pocet polozek: %d\n", PocetPolozek);
+}
+
+void Bstrom::VypisVelikost(){
+	VelikostPolozek(Koren);
+	Vel += sizeof(Koren);
+	Vel /= 1000;
+	printf("Velikost: %LLd kb\n", Vel);
 }
 
 void Bstrom::UkazStrom(){

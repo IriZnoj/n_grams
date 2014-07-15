@@ -21,6 +21,7 @@ static const int D = 5;
 class Rstrom;
 static Rstrom *Koren;
 static int PocetPolozek = 0;
+static int Vel = 0;
 static bool prvni = false;
 
 class Rzaznam{
@@ -29,7 +30,7 @@ public:
 	int souradnice[D];
 	//pocet cisel v poli
 	int dimenze;
-	Rstrom *mbr;
+	//Rstrom *mbr;
 	//Rzaznam *Soused;
 	Rzaznam(int souradnice[], int velikost);
 	Rzaznam(char *retezec);
@@ -73,7 +74,7 @@ private:
 	void VypoctiHranice(int &l, int &r, int &u, int &d, int x, int y);
 	int Rstrom::VypoctiHraniceUzlu(int puvodni[][2], int dim_puvodni, Rstrom *strom);
 	int DalsiPrvek(Rstrom *strom, bool prepocitatLevy, bool prepocitatPravy,  long long zmenal[],  long long zmenar[]);
-	 long long VypocitejObsah(int hranice[][2], int dimenze);
+	long long VypocitejObsah(int hranice[][2], int dimenze);
 	void VlozDoListu(Rzaznam *zaznam);
 	void RozdelList(Rzaznam *zaznam);
 	void VyberDvaZaznamy(int &l, int &r);
@@ -82,6 +83,7 @@ private:
 	bool Vyhledej(Rzaznam *zaznam);
 	bool JeStromList();
 	void VypisPolozky();
+	void VelikostPolozek();
 	void VypisPolozkyPlus();
 	void VypisZaznamySPotomky(int hloubka);
 
@@ -95,7 +97,9 @@ public:
 	void VlozZaznam(int souradnice[], int velikost);
 	void VlozPrvniZaznam(int souradnice[], int velikost);
 	bool Vyhledej(char *souradnice);
+	bool Vyhledej(int souradnice[], int velikost);
 	void Vypis();
+	void VypisVelikost();
 	void VypisPlus();
 	void UkazStrom();
 };
